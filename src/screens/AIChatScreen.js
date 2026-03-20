@@ -88,7 +88,7 @@ export default function AIChatScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={10}
     >
-      <View style={[styles.content, { paddingTop: spacing.sm + insets.top * 0.2 }]}>
+      <View style={[styles.content, { paddingTop: spacing.md + insets.top * 0.45 }]}> 
         <FlatList
           data={messages}
           keyExtractor={(item) => item.id}

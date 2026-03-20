@@ -8,7 +8,7 @@ export default function RecommendationListScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}>
+    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}> 
       <Text style={styles.pageTitle}>추천 정리 목록</Text>
       <Text style={styles.pageSubtitle}>AI가 우선순위 기반으로 정리 대상을 추천합니다.</Text>
 

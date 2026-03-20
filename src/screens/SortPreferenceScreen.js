@@ -12,7 +12,7 @@ export default function SortPreferenceScreen() {
   const [priority, setPriority] = useState('최신 파일 우선');
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}>
+    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}> 
       <Text style={styles.pageTitle}>정렬 기준</Text>
       <Text style={styles.pageSubtitle}>정렬과 우선순위 처리 기준을 설정하세요.</Text>
 

@@ -17,7 +17,7 @@ export default function DeviceCapacityScreen() {
   const usedTotal = sources.reduce((sum, item) => sum + item.usedGB, 0);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}>
+    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}> 
       <Text style={styles.pageTitle}>기기 용량</Text>
       <Text style={styles.pageSubtitle}>어디에서 얼마나 차지하는지 한눈에 확인하세요.</Text>
 

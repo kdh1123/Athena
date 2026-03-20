@@ -12,7 +12,7 @@ export default function PersonalInfoScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}>
+    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}> 
       <Text style={styles.pageTitle}>개인정보</Text>
       <Text style={styles.pageSubtitle}>계정과 취향 설정을 관리합니다.</Text>
 

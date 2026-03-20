@@ -16,7 +16,7 @@ export default function SettingsScreen({
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}
     >
       <Text style={styles.pageTitle}>설정</Text>
       <Text style={styles.pageSubtitle}>필요한 항목만 간단하게 관리하세요.</Text>

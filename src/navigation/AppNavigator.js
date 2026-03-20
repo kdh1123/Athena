@@ -14,6 +14,7 @@ import DeviceCapacityScreen from '../screens/DeviceCapacityScreen';
 import PersonalInfoScreen from '../screens/PersonalInfoScreen';
 import SortPreferenceScreen from '../screens/SortPreferenceScreen';
 import AIChatScreen from '../screens/AIChatScreen';
+import FileListScreen from '../screens/FileListScreen';
 import FloatingChatButton from '../components/FloatingChatButton';
 import { colors } from '../styles/theme';
 
@@ -66,6 +67,7 @@ function TabNavigator({ aiButtonEnabled, onToggleAiButton, darkMode, onToggleDar
 
 export default function AppNavigator() {
   const [aiButtonEnabled, setAiButtonEnabled] = useState(true);
+  const [aiButtonDeleteMode, setAiButtonDeleteMode] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
   const navTheme = useMemo(
@@ -87,6 +89,8 @@ export default function AppNavigator() {
           headerTintColor: colors.text,
           headerShadowVisible: false,
           animation: 'slide_from_right',
+          headerBackTitleVisible: false,
+          headerBackTitle: '',
         }}
       >
         <Stack.Screen name="AthenaTabs" options={{ headerShown: false }}>
@@ -110,16 +114,26 @@ export default function AppNavigator() {
         <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} options={{ title: '개인정보' }} />
         <Stack.Screen name="SortPreference" component={SortPreferenceScreen} options={{ title: '정렬 기준' }} />
         <Stack.Screen name="AIChat" component={AIChatScreen} options={{ title: 'Athena AI' }} />
+        <Stack.Screen name="FileList" component={FileListScreen} options={{ title: '파일 목록' }} />
       </Stack.Navigator>
 
       {aiButtonEnabled ? (
         <FloatingChatButton
           onPress={() => {
+            if (aiButtonDeleteMode) {
+              setAiButtonDeleteMode(false);
+              return;
+            }
             if (navigationRef.isReady()) {
               navigationRef.navigate('AIChat');
             }
           }}
-          onLongPress={() => setAiButtonEnabled(false)}
+          onLongPress={() => setAiButtonDeleteMode(true)}
+          showDelete={aiButtonDeleteMode}
+          onPressDelete={() => {
+            setAiButtonDeleteMode(false);
+            setAiButtonEnabled(false);
+          }}
         />
       ) : null}
     </NavigationContainer>

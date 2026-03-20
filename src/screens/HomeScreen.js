@@ -2,7 +2,7 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import StorageBar from '../components/StorageBar';
-import { recentActivities, recommendedActions } from '../styles/mockData';
+import { favoriteFiles, recentActivities, recommendedActions } from '../styles/mockData';
 import { colors, radius, shadows, spacing } from '../styles/theme';
 
 export default function HomeScreen({ navigation }) {
@@ -11,7 +11,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}
     >
       <Text style={styles.pageTitle}>Athena</Text>
       <Text style={styles.pageSubtitle}>AI 기반 파일 관리 대시보드</Text>
@@ -42,6 +42,16 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.sectionBlock}>
         <SectionHeader title="기기 용량" onPressTitle={() => navigation.navigate('DeviceCapacity')} />
         <StorageBar usedGB={96} totalGB={128} />
+      </View>
+
+      <View style={styles.sectionBlock}>
+        <SectionHeader title="즐겨찾기" rightLabel={`${favoriteFiles.length}개`} />
+        {favoriteFiles.map((item) => (
+          <View key={item.id} style={styles.favoriteRow}>
+            <Text style={styles.favoriteName} numberOfLines={1}>{item.name}</Text>
+            <Text style={styles.favoriteMeta}>{item.meta}</Text>
+          </View>
+        ))}
       </View>
 
       <View style={styles.sectionBlock}>
@@ -122,6 +132,23 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: 3,
     fontSize: 12,
+  },
+  favoriteRow: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: '#fffef8',
+    padding: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  favoriteName: {
+    color: colors.text,
+    fontWeight: '700',
+  },
+  favoriteMeta: {
+    color: colors.textMuted,
+    fontSize: 12,
+    marginTop: 2,
   },
   activityRow: {
     flexDirection: 'row',

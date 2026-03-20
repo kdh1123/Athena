@@ -57,7 +57,7 @@ export default function AnalysisScreen() {
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}
     >
       <Text style={styles.pageTitle}>저장 용량 분석</Text>
       <Text style={styles.pageSubtitle}>기기 상태 기반 인사이트 (더미)</Text>

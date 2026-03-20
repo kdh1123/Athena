@@ -1,14 +1,26 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import { categoryOptions, fileItems } from '../styles/mockData';
 import { colors, radius, shadows, spacing } from '../styles/theme';
 
-export default function FileScreen() {
+export default function FileScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const [selectedTag, setSelectedTag] = useState('전체');
-  const tags = ['전체', ...categoryOptions.filter((item) => item !== '전체'), '#업무', '#개인', '#사진', '#대용량'];
+  const [customTags, setCustomTags] = useState([]);
+  const [showTagInput, setShowTagInput] = useState(false);
+  const [tagInput, setTagInput] = useState('');
+
+  const tags = [
+    '전체',
+    ...categoryOptions.filter((item) => item !== '전체'),
+    '#업무',
+    '#개인',
+    '#사진',
+    '#대용량',
+    ...customTags,
+  ];
 
   const latestFive = useMemo(() => {
     const sorted = [...fileItems].sort(
@@ -33,12 +45,51 @@ export default function FileScreen() {
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}
     >
       <Text style={styles.pageTitle}>파일</Text>
       <Text style={styles.pageSubtitle}>전체 파일을 최신순으로 빠르게 확인하고 태그로 분류하세요.</Text>
 
-      <SectionHeader title="태그 분류" />
+      <Pressable style={styles.uploadBox}>
+        <Text style={styles.uploadTitle}>파일 불러오기</Text>
+        <Text style={styles.uploadSub}>탭해서 사진/문서 파일을 가져오세요. (UI)</Text>
+      </Pressable>
+
+      <SectionHeader
+        title="태그 분류"
+        rightLabel="태그 생성하기"
+        onPressRight={() => setShowTagInput((prev) => !prev)}
+      />
+      {showTagInput ? (
+        <View style={styles.tagComposer}>
+          <TextInput
+            value={tagInput}
+            onChangeText={setTagInput}
+            placeholder="새 태그 입력 (예: 여행)"
+            placeholderTextColor={colors.textMuted}
+            style={styles.tagInput}
+          />
+          <Pressable
+            style={styles.createButton}
+            onPress={() => {
+              const clean = tagInput.trim();
+              if (!clean) {
+                return;
+              }
+
+              const tag = clean.startsWith('#') ? clean : `#${clean}`;
+              if (!tags.includes(tag)) {
+                setCustomTags((prev) => [...prev, tag]);
+              }
+              setSelectedTag(tag);
+              setTagInput('');
+              setShowTagInput(false);
+            }}
+          >
+            <Text style={styles.createButtonText}>생성</Text>
+          </Pressable>
+        </View>
+      ) : null}
       <View style={styles.rowWrap}>
         {tags.map((tag) => (
           <Pressable
@@ -51,7 +102,7 @@ export default function FileScreen() {
         ))}
       </View>
 
-      <SectionHeader title="최신 파일" rightLabel={`${latestFive.length}개`} />
+      <SectionHeader title="최신 파일" rightLabel="모두 보기" onPressRight={() => navigation.navigate('FileList')} />
       {latestFive.map((item) => (
         <View key={item.id} style={styles.fileRow}>
           <View style={styles.fileHead}>
@@ -83,6 +134,52 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
     marginBottom: spacing.md,
     color: colors.textMuted,
+  },
+  uploadBox: {
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: '#d8cab5',
+    borderRadius: radius.md,
+    backgroundColor: '#fffef8',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
+  },
+  uploadTitle: {
+    color: colors.text,
+    fontWeight: '700',
+  },
+  uploadSub: {
+    color: colors.textMuted,
+    marginTop: 3,
+    fontSize: 12,
+  },
+  tagComposer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  tagInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    backgroundColor: '#fff',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    color: colors.text,
+  },
+  createButton: {
+    marginLeft: spacing.xs,
+    backgroundColor: colors.point,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  createButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 12,
   },
   rowWrap: {
     flexDirection: 'row',

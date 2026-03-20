@@ -25,6 +25,12 @@ export const recentActivities = [
   { id: 'act-3', text: '다운로드 폴더 점검', time: '2일 전' },
 ];
 
+export const favoriteFiles = [
+  { id: 'fav-1', name: '프로젝트 제안서.pdf', meta: '문서 · 8.4MB' },
+  { id: 'fav-2', name: '여행사진_도쿄_01.jpg', meta: '이미지 · 5.9MB' },
+  { id: 'fav-3', name: '디자인시안_v4.psd', meta: '디자인 · 258MB' },
+];
+
 export const fileItems = [
   {
     id: 'file-1',
