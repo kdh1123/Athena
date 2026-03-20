@@ -1,4 +1,4 @@
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, createNavigationContainerRef } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,14 +9,19 @@ import FileScreen from '../screens/FileScreen';
 import AnalysisScreen from '../screens/AnalysisScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import HistoryScreen from '../screens/HistoryScreen';
+import RecommendationListScreen from '../screens/RecommendationListScreen';
+import DeviceCapacityScreen from '../screens/DeviceCapacityScreen';
+import PersonalInfoScreen from '../screens/PersonalInfoScreen';
+import SortPreferenceScreen from '../screens/SortPreferenceScreen';
+import AIChatScreen from '../screens/AIChatScreen';
 import FloatingChatButton from '../components/FloatingChatButton';
-import ChatModal from '../components/ChatModal';
 import { colors } from '../styles/theme';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const navigationRef = createNavigationContainerRef();
 
-function TabNavigator() {
+function TabNavigator({ aiButtonEnabled, onToggleAiButton, darkMode, onToggleDarkMode }) {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -44,13 +49,24 @@ function TabNavigator() {
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: '홈' }} />
       <Tab.Screen name="File" component={FileScreen} options={{ title: '파일' }} />
       <Tab.Screen name="Analysis" component={AnalysisScreen} options={{ title: '분석' }} />
-      <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: '설정' }} />
+      <Tab.Screen name="Settings" options={{ title: '설정' }}>
+        {(props) => (
+          <SettingsScreen
+            {...props}
+            aiButtonEnabled={aiButtonEnabled}
+            onToggleAiButton={onToggleAiButton}
+            darkMode={darkMode}
+            onToggleDarkMode={onToggleDarkMode}
+          />
+        )}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 }
 
 export default function AppNavigator() {
-  const [chatVisible, setChatVisible] = useState(false);
+  const [aiButtonEnabled, setAiButtonEnabled] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   const navTheme = useMemo(
     () => ({
@@ -64,7 +80,7 @@ export default function AppNavigator() {
   );
 
   return (
-    <NavigationContainer theme={navTheme}>
+    <NavigationContainer ref={navigationRef} theme={navTheme}>
       <Stack.Navigator
         screenOptions={{
           headerStyle: { backgroundColor: '#fffef8' },
@@ -73,12 +89,39 @@ export default function AppNavigator() {
           animation: 'slide_from_right',
         }}
       >
-        <Stack.Screen name="AthenaTabs" component={TabNavigator} options={{ headerShown: false }} />
-        <Stack.Screen name="History" component={HistoryScreen} options={{ title: '히스토리' }} />
+        <Stack.Screen name="AthenaTabs" options={{ headerShown: false }}>
+          {(props) => (
+            <TabNavigator
+              {...props}
+              aiButtonEnabled={aiButtonEnabled}
+              onToggleAiButton={setAiButtonEnabled}
+              darkMode={darkMode}
+              onToggleDarkMode={setDarkMode}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen
+          name="History"
+          component={HistoryScreen}
+          options={{ title: '히스토리', headerBackTitleVisible: false }}
+        />
+        <Stack.Screen name="RecommendationList" component={RecommendationListScreen} options={{ title: '추천 정리' }} />
+        <Stack.Screen name="DeviceCapacity" component={DeviceCapacityScreen} options={{ title: '기기 용량' }} />
+        <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} options={{ title: '개인정보' }} />
+        <Stack.Screen name="SortPreference" component={SortPreferenceScreen} options={{ title: '정렬 기준' }} />
+        <Stack.Screen name="AIChat" component={AIChatScreen} options={{ title: 'Athena AI' }} />
       </Stack.Navigator>
 
-      <FloatingChatButton onPress={() => setChatVisible(true)} />
-      <ChatModal visible={chatVisible} onClose={() => setChatVisible(false)} />
+      {aiButtonEnabled ? (
+        <FloatingChatButton
+          onPress={() => {
+            if (navigationRef.isReady()) {
+              navigationRef.navigate('AIChat');
+            }
+          }}
+          onLongPress={() => setAiButtonEnabled(false)}
+        />
+      ) : null}
     </NavigationContainer>
   );
 }

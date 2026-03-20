@@ -1,9 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, shadows, spacing } from '../styles/theme';
 
-export default function FloatingChatButton({ onPress }) {
+export default function FloatingChatButton({ onPress, onLongPress }) {
   return (
-    <Pressable style={styles.button} onPress={onPress}>
+    <Pressable style={styles.button} onPress={onPress} onLongPress={onLongPress} delayLongPress={500}>
       <View style={styles.inner}>
         <Text style={styles.emoji}>AI</Text>
       </View>
@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
   button: {
     position: 'absolute',
     right: spacing.lg,
-    bottom: spacing.xl,
+    bottom: 96,
     width: 62,
     height: 62,
     borderRadius: radius.xl,

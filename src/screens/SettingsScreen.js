@@ -1,55 +1,74 @@
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useState } from 'react';
-import SectionHeader from '../components/SectionHeader';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, radius, shadows, spacing } from '../styles/theme';
 
-export default function SettingsScreen({ navigation }) {
+export default function SettingsScreen({
+  navigation,
+  aiButtonEnabled,
+  onToggleAiButton,
+  darkMode,
+  onToggleDarkMode,
+}) {
+  const insets = useSafeAreaInsets();
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}
+    >
       <Text style={styles.pageTitle}>설정</Text>
-      <Text style={styles.pageSubtitle}>개인화 옵션 UI</Text>
+      <Text style={styles.pageSubtitle}>필요한 항목만 간단하게 관리하세요.</Text>
 
       <View style={styles.card}>
-        <SectionHeader title="사용자 정보" />
-        <Text style={styles.userName}>김아테나</Text>
-        <Text style={styles.userMeta}>athena.user@example.com</Text>
+        <Pressable style={styles.linkRow} onPress={() => navigation.navigate('PersonalInfo')}>
+          <Text style={styles.linkTitle}>개인정보</Text>
+          <Text style={styles.linkValue}>변경하기</Text>
+        </Pressable>
+
+        <Pressable style={styles.linkRow} onPress={() => navigation.navigate('SortPreference')}>
+          <Text style={styles.linkTitle}>정렬 기준</Text>
+          <Text style={styles.linkValue}>기준 변경</Text>
+        </Pressable>
+
+        <Pressable style={styles.linkRow} onPress={() => navigation.navigate('History')}>
+          <Text style={styles.linkTitle}>히스토리</Text>
+          <Text style={styles.linkValue}>기록 보기</Text>
+        </Pressable>
       </View>
 
       <View style={styles.card}>
-        <SectionHeader title="정렬 기준" />
         <View style={styles.optionRow}>
-          <Text style={styles.optionLabel}>기본 정렬</Text>
-          <Text style={styles.optionValue}>최근순</Text>
+          <Text style={styles.optionLabel}>알림 설정</Text>
+          <Switch
+            value={notifications}
+            onValueChange={setNotifications}
+            trackColor={{ false: '#ddd', true: '#f6c0b2' }}
+            thumbColor={notifications ? colors.point : '#fff'}
+          />
         </View>
+
         <View style={styles.optionRow}>
-          <Text style={styles.optionLabel}>동일 항목 처리</Text>
-          <Text style={styles.optionValue}>최신 파일 우선</Text>
+          <Text style={styles.optionLabel}>화면 모드</Text>
+          <Switch
+            value={darkMode}
+            onValueChange={onToggleDarkMode}
+            trackColor={{ false: '#c3fcf1', true: '#f6c0b2' }}
+            thumbColor={darkMode ? colors.point : '#fff'}
+          />
+        </View>
+
+        <View style={styles.optionRow}>
+          <Text style={styles.optionLabel}>AI 아이콘 활성화</Text>
+          <Switch
+            value={aiButtonEnabled}
+            onValueChange={onToggleAiButton}
+            trackColor={{ false: '#ddd', true: '#f6c0b2' }}
+            thumbColor={aiButtonEnabled ? colors.point : '#fff'}
+          />
         </View>
       </View>
-
-      <View style={styles.card}>
-        <SectionHeader title="알림 설정" />
-        <View style={styles.optionRow}>
-          <Text style={styles.optionLabel}>정리 추천 알림</Text>
-          <Switch value={notifications} onValueChange={setNotifications} trackColor={{ false: '#ddd', true: '#f6c0b2' }} thumbColor={notifications ? colors.point : '#fff'} />
-        </View>
-      </View>
-
-      <View style={styles.card}>
-        <SectionHeader title="화면 모드" />
-        <View style={styles.optionRow}>
-          <Text style={styles.optionLabel}>라이트 / 다크 모드</Text>
-          <Switch value={darkMode} onValueChange={setDarkMode} trackColor={{ false: '#ddd', true: '#f6c0b2' }} thumbColor={darkMode ? colors.point : '#fff'} />
-        </View>
-        <Text style={styles.note}>현재는 UI 토글만 제공됩니다.</Text>
-      </View>
-
-      <Pressable style={styles.historyButton} onPress={() => navigation.navigate('History')}>
-        <Text style={styles.historyButtonText}>히스토리 페이지로 이동</Text>
-      </Pressable>
     </ScrollView>
   );
 }
@@ -78,48 +97,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
-    padding: spacing.md,
+    padding: spacing.sm,
     marginBottom: spacing.md,
     ...shadows.card,
   },
-  userName: {
-    color: colors.text,
-    fontSize: 20,
-    fontWeight: '800',
+  linkRow: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
+    backgroundColor: '#fffef8',
+    marginBottom: spacing.xs,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  userMeta: {
-    color: colors.textMuted,
-    marginTop: spacing.xs,
+  linkTitle: {
+    color: colors.text,
+    fontWeight: '700',
+  },
+  linkValue: {
+    color: colors.point,
+    fontSize: 12,
+    fontWeight: '700',
   },
   optionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   optionLabel: {
     color: colors.text,
     fontWeight: '600',
-  },
-  optionValue: {
-    color: colors.sub,
-    fontWeight: '700',
-  },
-  note: {
-    color: colors.textMuted,
-    fontSize: 12,
-    marginTop: spacing.xs,
-  },
-  historyButton: {
-    borderRadius: radius.md,
-    backgroundColor: colors.point,
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    ...shadows.card,
-  },
-  historyButtonText: {
-    color: '#fff',
-    fontWeight: '800',
-    fontSize: 15,
   },
 });

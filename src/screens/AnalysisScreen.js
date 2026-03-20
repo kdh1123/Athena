@@ -1,9 +1,16 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import { analysisRecommendations } from '../styles/mockData';
 import { colors, radius, shadows, spacing } from '../styles/theme';
 
-function UsageLine({ label, percent, color }) {
+function UsageLine({ label, percent, color, progress }) {
+  const animatedWidth = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', `${percent}%`],
+  });
+
   return (
     <View style={styles.usageBlock}>
       <View style={styles.usageHead}>
@@ -11,15 +18,47 @@ function UsageLine({ label, percent, color }) {
         <Text style={styles.usagePercent}>{percent}%</Text>
       </View>
       <View style={styles.track}>
-        <View style={[styles.progress, { width: `${percent}%`, backgroundColor: color }]} />
+        <Animated.View style={[styles.progress, { width: animatedWidth, opacity: progress, backgroundColor: color }]} />
       </View>
     </View>
   );
 }
 
 export default function AnalysisScreen() {
+  const insets = useSafeAreaInsets();
+  const usage = useMemo(
+    () => [
+      { label: '이미지', percent: 42, color: '#fa8e73' },
+      { label: '문서', percent: 18, color: '#c7a58b' },
+      { label: '오디오', percent: 11, color: '#8aa7c8' },
+      { label: '기타', percent: 29, color: '#8ebf9f' },
+    ],
+    []
+  );
+  const progressValues = useRef(usage.map(() => new Animated.Value(0))).current;
+
+  useEffect(() => {
+    progressValues.forEach((value) => value.setValue(0));
+
+    const sequence = Animated.stagger(
+      140,
+      progressValues.map((value) =>
+        Animated.timing(value, {
+          toValue: 1,
+          duration: 520,
+          useNativeDriver: false,
+        })
+      )
+    );
+
+    sequence.start();
+  }, [progressValues]);
+
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}
+    >
       <Text style={styles.pageTitle}>저장 용량 분석</Text>
       <Text style={styles.pageSubtitle}>기기 상태 기반 인사이트 (더미)</Text>
 
@@ -32,10 +71,15 @@ export default function AnalysisScreen() {
 
       <View style={styles.sectionCard}>
         <SectionHeader title="용량 분포" />
-        <UsageLine label="이미지" percent={42} color="#fa8e73" />
-        <UsageLine label="문서" percent={18} color="#c7a58b" />
-        <UsageLine label="오디오" percent={11} color="#8aa7c8" />
-        <UsageLine label="기타" percent={29} color="#8ebf9f" />
+        {usage.map((item, index) => (
+          <UsageLine
+            key={item.label}
+            label={item.label}
+            percent={item.percent}
+            color={item.color}
+            progress={progressValues[index]}
+          />
+        ))}
       </View>
 
       <View style={styles.sectionCard}>

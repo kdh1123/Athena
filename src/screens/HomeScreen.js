@@ -1,12 +1,18 @@
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import StorageBar from '../components/StorageBar';
 import { recentActivities, recommendedActions } from '../styles/mockData';
 import { colors, radius, shadows, spacing } from '../styles/theme';
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}
+    >
       <Text style={styles.pageTitle}>Athena</Text>
       <Text style={styles.pageSubtitle}>AI 기반 파일 관리 대시보드</Text>
 
@@ -17,7 +23,11 @@ export default function HomeScreen() {
       />
 
       <View style={styles.sectionBlock}>
-        <SectionHeader title="추천 정리" rightLabel="모두 보기" />
+        <SectionHeader
+          title="추천 정리"
+          rightLabel="모두 보기"
+          onPressRight={() => navigation.navigate('RecommendationList')}
+        />
         {recommendedActions.map((action) => (
           <View key={action.id} style={styles.recommendCard}>
             <View style={[styles.dot, { backgroundColor: action.color }]} />
@@ -30,7 +40,7 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.sectionBlock}>
-        <SectionHeader title="기기 저장 현황" />
+        <SectionHeader title="기기 용량" onPressTitle={() => navigation.navigate('DeviceCapacity')} />
         <StorageBar usedGB={96} totalGB={128} />
       </View>
 

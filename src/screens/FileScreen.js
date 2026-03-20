@@ -1,54 +1,65 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import FileCard from '../components/FileCard';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
-import TagItem from '../components/TagItem';
-import { categoryOptions, fileItems, filterOptions, sortOptions } from '../styles/mockData';
+import { categoryOptions, fileItems } from '../styles/mockData';
 import { colors, radius, shadows, spacing } from '../styles/theme';
 
 export default function FileScreen() {
+  const insets = useSafeAreaInsets();
+  const [selectedTag, setSelectedTag] = useState('전체');
+  const tags = ['전체', ...categoryOptions.filter((item) => item !== '전체'), '#업무', '#개인', '#사진', '#대용량'];
+
+  const latestFive = useMemo(() => {
+    const sorted = [...fileItems].sort(
+      (a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime()
+    );
+
+    const filtered = sorted.filter((item) => {
+      if (selectedTag === '전체') {
+        return true;
+      }
+
+      if (selectedTag.startsWith('#')) {
+        return item.tags.includes(selectedTag.replace('#', ''));
+      }
+
+      return item.category === selectedTag;
+    });
+
+    return filtered.slice(0, 5);
+  }, [selectedTag]);
+
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.pageTitle}>파일 정리 결과</Text>
-      <Text style={styles.pageSubtitle}>시뮬레이션 기반 UI 화면</Text>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.md + insets.top * 0.25 }]}
+    >
+      <Text style={styles.pageTitle}>파일</Text>
+      <Text style={styles.pageSubtitle}>전체 파일을 최신순으로 빠르게 확인하고 태그로 분류하세요.</Text>
 
-      <View style={styles.summaryCard}>
-        <Text style={styles.summaryTitle}>정리 예상 결과</Text>
-        <Text style={styles.summaryValue}>2.28GB 절약 가능</Text>
-        <Text style={styles.summarySub}>중복/미사용 파일 243개 감지 (더미 데이터)</Text>
-      </View>
-
-      <SectionHeader title="카테고리" />
+      <SectionHeader title="태그 분류" />
       <View style={styles.rowWrap}>
-        {categoryOptions.map((category, index) => (
-          <TagItem key={category} label={category} active={index === 0} />
+        {tags.map((tag) => (
+          <Pressable
+            key={tag}
+            onPress={() => setSelectedTag(tag)}
+            style={[styles.chip, selectedTag === tag && styles.activeChip]}
+          >
+            <Text style={[styles.chipLabel, selectedTag === tag && styles.activeChipLabel]}>{tag}</Text>
+          </Pressable>
         ))}
       </View>
 
-      <SectionHeader title="태그 기반 분류" />
-      <View style={styles.rowWrap}>
-        <TagItem label="#업무" active />
-        <TagItem label="#개인" />
-        <TagItem label="#사진" />
-        <TagItem label="#대용량" />
-      </View>
-
-      <SectionHeader title="정렬 옵션" />
-      <View style={styles.rowWrap}>
-        {sortOptions.map((sortOption, index) => (
-          <TagItem key={sortOption} label={sortOption} active={index === 0} />
-        ))}
-      </View>
-
-      <SectionHeader title="필터" />
-      <View style={styles.rowWrap}>
-        {filterOptions.map((filter, index) => (
-          <TagItem key={filter} label={filter} active={index === 1} />
-        ))}
-      </View>
-
-      <SectionHeader title="파일 리스트" rightLabel={`${fileItems.length}개`} />
-      {fileItems.map((item) => (
-        <FileCard key={item.id} item={item} />
+      <SectionHeader title="최신 파일" rightLabel={`${latestFive.length}개`} />
+      {latestFive.map((item) => (
+        <View key={item.id} style={styles.fileRow}>
+          <View style={styles.fileHead}>
+            <Text style={styles.fileName} numberOfLines={1}>{item.name}</Text>
+            <Text style={styles.fileSize}>{item.size}</Text>
+          </View>
+          <Text style={styles.fileMeta}>{item.category} · {item.modifiedAt} · #{item.tags.join(' #')}</Text>
+        </View>
       ))}
     </ScrollView>
   );
@@ -73,33 +84,61 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     color: colors.textMuted,
   },
-  summaryCard: {
-    backgroundColor: colors.main,
-    borderRadius: radius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-    borderWidth: 1,
-    borderColor: '#f3dd74',
-    ...shadows.card,
-  },
-  summaryTitle: {
-    color: colors.text,
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  summaryValue: {
-    color: colors.text,
-    fontWeight: '900',
-    marginTop: spacing.xs,
-    fontSize: 26,
-  },
-  summarySub: {
-    color: '#5b5249',
-    marginTop: spacing.xs,
-  },
   rowWrap: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: spacing.md,
+  },
+  chip: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: '#fff',
+    marginRight: spacing.xs,
+    marginBottom: spacing.xs,
+  },
+  activeChip: {
+    backgroundColor: colors.main,
+    borderColor: colors.main,
+  },
+  chipLabel: {
+    fontSize: 12,
+    color: colors.textMuted,
+    fontWeight: '600',
+  },
+  activeChipLabel: {
+    color: colors.text,
+  },
+  fileRow: {
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    padding: spacing.sm,
+    marginBottom: spacing.xs,
+    ...shadows.card,
+  },
+  fileHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  fileName: {
+    flex: 1,
+    marginRight: spacing.xs,
+    color: colors.text,
+    fontWeight: '700',
+  },
+  fileSize: {
+    color: colors.point,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  fileMeta: {
+    marginTop: 4,
+    color: colors.textMuted,
+    fontSize: 12,
   },
 });
