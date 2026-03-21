@@ -130,6 +130,16 @@ export const analysisRecommendations = [
     title: '프로젝트별 태그 통일',
     description: '태그를 통일하면 검색 정확도가 높아집니다.',
   },
+  {
+    id: 'ana-4',
+    title: '스크린샷 자동 정리 규칙 설정',
+    description: '30일 이상 지난 스크린샷은 주기적으로 보관함으로 이동하세요.',
+  },
+  {
+    id: 'ana-5',
+    title: '중복 동영상 압축본 유지',
+    description: '원본/압축본 동시 보관 파일을 정리해 여유 공간을 확보할 수 있습니다.',
+  },
 ];
 
 export const historyItems = [

@@ -1,4 +1,4 @@
-export const colors = {
+export const lightColors = {
   background: '#fffdf5',
   card: '#ffffff',
   main: '#FFF099',
@@ -9,6 +9,24 @@ export const colors = {
   border: '#f1e6d2',
   success: '#6ca581',
 };
+
+export const darkColors = {
+  background: '#14171d',
+  card: '#1d2430',
+  main: '#4f4b2f',
+  point: '#f6c0b2',
+  sub: '#c9ad9a',
+  text: '#f3f6fb',
+  textMuted: '#a9b1bf',
+  border: '#2b3444',
+  success: '#7fc29a',
+};
+
+export const colors = lightColors;
+
+export function getPalette(isDark) {
+  return isDark ? darkColors : lightColors;
+}
 
 export const spacing = {
   xs: 6,

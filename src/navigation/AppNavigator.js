@@ -15,23 +15,27 @@ import PersonalInfoScreen from '../screens/PersonalInfoScreen';
 import SortPreferenceScreen from '../screens/SortPreferenceScreen';
 import AIChatScreen from '../screens/AIChatScreen';
 import FileListScreen from '../screens/FileListScreen';
+import FavoriteListScreen from '../screens/FavoriteListScreen';
+import AnalysisRecommendationScreen from '../screens/AnalysisRecommendationScreen';
 import FloatingChatButton from '../components/FloatingChatButton';
-import { colors } from '../styles/theme';
+import { getPalette } from '../styles/theme';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const navigationRef = createNavigationContainerRef();
 
 function TabNavigator({ aiButtonEnabled, onToggleAiButton, darkMode, onToggleDarkMode }) {
+  const palette = getPalette(darkMode);
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: colors.point,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarActiveTintColor: palette.point,
+        tabBarInactiveTintColor: palette.textMuted,
         tabBarStyle: {
-          backgroundColor: '#fffef8',
-          borderTopColor: '#f2e7d1',
+          backgroundColor: palette.card,
+          borderTopColor: palette.border,
           height: 66,
           paddingBottom: 8,
           paddingTop: 8,
@@ -47,9 +51,15 @@ function TabNavigator({ aiButtonEnabled, onToggleAiButton, darkMode, onToggleDar
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: '홈' }} />
-      <Tab.Screen name="File" component={FileScreen} options={{ title: '파일' }} />
-      <Tab.Screen name="Analysis" component={AnalysisScreen} options={{ title: '분석' }} />
+      <Tab.Screen name="Home" options={{ title: '홈' }}>
+        {(props) => <HomeScreen {...props} darkMode={darkMode} />}
+      </Tab.Screen>
+      <Tab.Screen name="File" options={{ title: '파일' }}>
+        {(props) => <FileScreen {...props} darkMode={darkMode} />}
+      </Tab.Screen>
+      <Tab.Screen name="Analysis" options={{ title: '분석' }}>
+        {(props) => <AnalysisScreen {...props} darkMode={darkMode} />}
+      </Tab.Screen>
       <Tab.Screen name="Settings" options={{ title: '설정' }}>
         {(props) => (
           <SettingsScreen
@@ -68,29 +78,37 @@ function TabNavigator({ aiButtonEnabled, onToggleAiButton, darkMode, onToggleDar
 export default function AppNavigator() {
   const [aiButtonEnabled, setAiButtonEnabled] = useState(true);
   const [aiButtonDeleteMode, setAiButtonDeleteMode] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
+
+  const palette = getPalette(darkMode);
 
   const navTheme = useMemo(
     () => ({
       ...DefaultTheme,
+      dark: darkMode,
       colors: {
         ...DefaultTheme.colors,
-        background: colors.background,
+        background: palette.background,
+        card: palette.card,
+        text: palette.text,
+        border: palette.border,
+        primary: palette.point,
       },
     }),
-    []
+    [darkMode, palette.background, palette.border, palette.card, palette.point, palette.text]
   );
 
   return (
     <NavigationContainer ref={navigationRef} theme={navTheme}>
       <Stack.Navigator
         screenOptions={{
-          headerStyle: { backgroundColor: '#fffef8' },
-          headerTintColor: colors.text,
+          headerStyle: { backgroundColor: palette.card },
+          headerTintColor: palette.text,
           headerShadowVisible: false,
           animation: 'slide_from_right',
           headerBackTitleVisible: false,
           headerBackTitle: '',
+          headerBackButtonDisplayMode: 'minimal',
         }}
       >
         <Stack.Screen name="AthenaTabs" options={{ headerShown: false }}>
@@ -109,12 +127,30 @@ export default function AppNavigator() {
           component={HistoryScreen}
           options={{ title: '히스토리', headerBackTitleVisible: false }}
         />
-        <Stack.Screen name="RecommendationList" component={RecommendationListScreen} options={{ title: '추천 정리' }} />
-        <Stack.Screen name="DeviceCapacity" component={DeviceCapacityScreen} options={{ title: '기기 용량' }} />
-        <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} options={{ title: '개인정보' }} />
-        <Stack.Screen name="SortPreference" component={SortPreferenceScreen} options={{ title: '정렬 기준' }} />
-        <Stack.Screen name="AIChat" component={AIChatScreen} options={{ title: 'Athena AI' }} />
-        <Stack.Screen name="FileList" component={FileListScreen} options={{ title: '파일 목록' }} />
+        <Stack.Screen name="RecommendationList" options={{ title: '추천 정리' }}>
+          {(props) => <RecommendationListScreen {...props} darkMode={darkMode} />}
+        </Stack.Screen>
+        <Stack.Screen name="DeviceCapacity" options={{ title: '기기 용량' }}>
+          {(props) => <DeviceCapacityScreen {...props} darkMode={darkMode} />}
+        </Stack.Screen>
+        <Stack.Screen name="PersonalInfo" options={{ title: '개인정보' }}>
+          {(props) => <PersonalInfoScreen {...props} darkMode={darkMode} />}
+        </Stack.Screen>
+        <Stack.Screen name="SortPreference" options={{ title: '정렬 기준' }}>
+          {(props) => <SortPreferenceScreen {...props} darkMode={darkMode} />}
+        </Stack.Screen>
+        <Stack.Screen name="AIChat" options={{ title: 'Athena AI' }}>
+          {(props) => <AIChatScreen {...props} darkMode={darkMode} />}
+        </Stack.Screen>
+        <Stack.Screen name="FileList" options={{ title: '파일 목록' }}>
+          {(props) => <FileListScreen {...props} darkMode={darkMode} />}
+        </Stack.Screen>
+        <Stack.Screen name="FavoriteList" options={{ title: '즐겨찾기' }}>
+          {(props) => <FavoriteListScreen {...props} />}
+        </Stack.Screen>
+        <Stack.Screen name="AnalysisRecommendation" options={{ title: '개선 제안' }}>
+          {(props) => <AnalysisRecommendationScreen {...props} />}
+        </Stack.Screen>
       </Stack.Navigator>
 
       {aiButtonEnabled ? (
@@ -134,6 +170,7 @@ export default function AppNavigator() {
             setAiButtonDeleteMode(false);
             setAiButtonEnabled(false);
           }}
+          darkMode={darkMode}
         />
       ) : null}
     </NavigationContainer>

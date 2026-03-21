@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, radius, shadows, spacing } from '../styles/theme';
+import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
 const seedMessages = [
   {
@@ -14,8 +14,9 @@ const seedMessages = [
   },
 ];
 
-export default function AIChatScreen() {
+export default function AIChatScreen({ darkMode }) {
   const insets = useSafeAreaInsets();
+  const palette = getPalette(darkMode);
   const [messages, setMessages] = useState(seedMessages);
   const [input, setInput] = useState('');
 
@@ -84,35 +85,44 @@ export default function AIChatScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.screen}
+      style={[styles.screen, { backgroundColor: palette.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={10}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 52 : 0}
     >
-      <View style={[styles.content, { paddingTop: spacing.md + insets.top * 0.45 }]}> 
+      <View style={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 + 5 }]}> 
         <FlatList
           data={messages}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.messageList}
+          contentContainerStyle={[styles.messageList, { paddingBottom: spacing.sm }]}
+          keyboardDismissMode="interactive"
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
-            <View style={[styles.bubble, item.role === 'user' ? styles.userBubble : styles.aiBubble]}>
+            <View
+              style={[
+                styles.bubble,
+                item.role === 'user'
+                  ? [styles.userBubble, { backgroundColor: palette.point }]
+                  : [styles.aiBubble, { backgroundColor: darkMode ? '#1a212d' : '#fff8df', borderColor: darkMode ? palette.border : '#f1e4be' }],
+              ]}
+            >
               <Text style={[styles.bubbleText, item.role === 'user' && styles.userBubbleText]}>{item.text}</Text>
             </View>
           )}
         />
 
         <View style={[styles.inputRow, { paddingBottom: Math.max(insets.bottom, spacing.sm) }]}>
-          <Pressable style={styles.attachButton} onPress={onPressAttach}>
-            <Ionicons name="attach" size={18} color={colors.text} />
+          <Pressable style={[styles.attachButton, { borderColor: palette.border, backgroundColor: palette.card }]} onPress={onPressAttach}>
+            <Ionicons name="attach" size={18} color={palette.text} />
           </Pressable>
           <TextInput
             value={input}
             onChangeText={setInput}
             placeholder="메시지를 입력하세요"
-            placeholderTextColor={colors.textMuted}
-            style={styles.input}
+            placeholderTextColor={palette.textMuted}
+            style={[styles.input, { borderColor: palette.border, backgroundColor: palette.card, color: palette.text }]}
             multiline
           />
-          <Pressable style={[styles.sendButton, !canSend && styles.sendButtonDisabled]} onPress={onSend}>
+          <Pressable style={[styles.sendButton, { backgroundColor: palette.point }, !canSend && styles.sendButtonDisabled]} onPress={onSend}>
             <Ionicons name="arrow-up" size={16} color="#fff" />
           </Pressable>
         </View>
@@ -124,7 +134,6 @@ export default function AIChatScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -143,13 +152,10 @@ const styles = StyleSheet.create({
   },
   aiBubble: {
     alignSelf: 'flex-start',
-    backgroundColor: '#fff8df',
     borderWidth: 1,
-    borderColor: '#f1e4be',
   },
   userBubble: {
     alignSelf: 'flex-end',
-    backgroundColor: colors.point,
   },
   bubbleText: {
     color: colors.text,
@@ -168,10 +174,8 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 19,
     borderWidth: 1,
-    borderColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
     marginRight: spacing.xs,
   },
   input: {
@@ -179,18 +183,14 @@ const styles = StyleSheet.create({
     minHeight: 38,
     maxHeight: 120,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
-    backgroundColor: '#fff',
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    color: colors.text,
   },
   sendButton: {
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: colors.point,
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: spacing.xs,

@@ -3,26 +3,27 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import StorageBar from '../components/StorageBar';
 import { favoriteFiles, recentActivities, recommendedActions } from '../styles/mockData';
-import { colors, radius, shadows, spacing } from '../styles/theme';
+import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation, darkMode }) {
   const insets = useSafeAreaInsets();
+  const palette = getPalette(darkMode);
 
   return (
     <ScrollView
-      style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}
+      style={[styles.screen, { backgroundColor: palette.background }]}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 + 5 }]}
     >
-      <Text style={styles.pageTitle}>Athena</Text>
-      <Text style={styles.pageSubtitle}>AI 기반 파일 관리 대시보드</Text>
+      <Text style={[styles.pageTitle, { color: palette.text }]}>Athena</Text>
+      <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>AI 기반 파일 관리 대시보드</Text>
 
       <TextInput
         placeholder="파일 이름, 태그, 카테고리 검색"
-        placeholderTextColor={colors.textMuted}
-        style={styles.searchInput}
+        placeholderTextColor={palette.textMuted}
+        style={[styles.searchInput, { borderColor: palette.border, backgroundColor: palette.card, color: palette.text }]}
       />
 
-      <View style={styles.sectionBlock}>
+      <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}> 
         <SectionHeader
           title="추천 정리"
           rightLabel="모두 보기"
@@ -39,27 +40,34 @@ export default function HomeScreen({ navigation }) {
         ))}
       </View>
 
-      <View style={styles.sectionBlock}>
+      <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}> 
         <SectionHeader title="기기 용량" onPressTitle={() => navigation.navigate('DeviceCapacity')} />
         <StorageBar usedGB={96} totalGB={128} />
       </View>
 
-      <View style={styles.sectionBlock}>
-        <SectionHeader title="즐겨찾기" rightLabel={`${favoriteFiles.length}개`} />
-        {favoriteFiles.map((item) => (
-          <View key={item.id} style={styles.favoriteRow}>
-            <Text style={styles.favoriteName} numberOfLines={1}>{item.name}</Text>
-            <Text style={styles.favoriteMeta}>{item.meta}</Text>
+      <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}> 
+        <SectionHeader
+          title="즐겨찾기"
+          rightLabel="모두 보기"
+          onPressRight={() => navigation.navigate('FavoriteList', { darkMode })}
+        />
+        {favoriteFiles.slice(0, 2).map((item) => (
+          <View
+            key={item.id}
+            style={[styles.favoriteRow, { borderColor: palette.border, backgroundColor: darkMode ? '#151c27' : '#fffef8' }]}
+          >
+            <Text style={[styles.favoriteName, { color: palette.text }]} numberOfLines={1}>{item.name}</Text>
+            <Text style={[styles.favoriteMeta, { color: palette.textMuted }]}>{item.meta}</Text>
           </View>
         ))}
       </View>
 
-      <View style={styles.sectionBlock}>
+      <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}> 
         <SectionHeader title="최근 활동" />
         {recentActivities.map((activity) => (
           <View key={activity.id} style={styles.activityRow}>
-            <Text style={styles.activityText}>{activity.text}</Text>
-            <Text style={styles.activityTime}>{activity.time}</Text>
+            <Text style={[styles.activityText, { color: palette.text }]}>{activity.text}</Text>
+            <Text style={[styles.activityTime, { color: palette.textMuted }]}>{activity.time}</Text>
           </View>
         ))}
       </View>

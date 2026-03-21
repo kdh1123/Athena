@@ -2,24 +2,25 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import { recommendedActions } from '../styles/mockData';
-import { colors, radius, shadows, spacing } from '../styles/theme';
+import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
-export default function RecommendationListScreen() {
+export default function RecommendationListScreen({ darkMode }) {
   const insets = useSafeAreaInsets();
+  const palette = getPalette(darkMode);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}> 
-      <Text style={styles.pageTitle}>추천 정리 목록</Text>
-      <Text style={styles.pageSubtitle}>AI가 우선순위 기반으로 정리 대상을 추천합니다.</Text>
+    <ScrollView style={[styles.screen, { backgroundColor: palette.background }]} contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 + 5 }]}> 
+      <Text style={[styles.pageTitle, { color: palette.text }]}>추천 정리 목록</Text>
+      <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>AI가 우선순위 기반으로 정리 대상을 추천합니다.</Text>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}> 
         <SectionHeader title="전체 추천" rightLabel={`${recommendedActions.length}개`} />
         {recommendedActions.map((action) => (
-          <View key={action.id} style={styles.item}>
+          <View key={action.id} style={[styles.item, { borderColor: palette.border, backgroundColor: darkMode ? '#151c27' : '#fffef8' }]}> 
             <View style={[styles.dot, { backgroundColor: action.color }]} />
             <View style={styles.textWrap}>
-              <Text style={styles.itemTitle}>{action.title}</Text>
-              <Text style={styles.itemSub}>{action.subtitle}</Text>
+              <Text style={[styles.itemTitle, { color: palette.text }]}>{action.title}</Text>
+              <Text style={[styles.itemSub, { color: palette.textMuted }]}>{action.subtitle}</Text>
             </View>
           </View>
         ))}
@@ -31,7 +32,6 @@ export default function RecommendationListScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   content: {
     paddingHorizontal: spacing.md,
@@ -39,18 +39,14 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     fontSize: 26,
-    color: colors.text,
     fontWeight: '800',
   },
   pageSubtitle: {
     marginTop: spacing.xs,
     marginBottom: spacing.md,
-    color: colors.textMuted,
   },
   card: {
-    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.lg,
     padding: spacing.md,
     ...shadows.card,
@@ -59,9 +55,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     borderRadius: radius.md,
-    backgroundColor: '#fffef8',
     borderWidth: 1,
-    borderColor: colors.border,
     padding: spacing.sm,
     marginBottom: spacing.sm,
   },
@@ -76,12 +70,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemTitle: {
-    color: colors.text,
     fontWeight: '700',
     fontSize: 14,
   },
   itemSub: {
-    color: colors.textMuted,
     marginTop: 3,
     fontSize: 12,
   },

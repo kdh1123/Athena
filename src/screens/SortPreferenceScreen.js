@@ -1,44 +1,53 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, radius, shadows, spacing } from '../styles/theme';
+import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
 const sortCandidates = ['최근순', '용량순', '이름순'];
 const priorityCandidates = ['최신 파일 우선', '중요 태그 우선', '대용량 우선'];
 
-export default function SortPreferenceScreen() {
+export default function SortPreferenceScreen({ darkMode }) {
   const insets = useSafeAreaInsets();
+  const palette = getPalette(darkMode);
   const [sortBy, setSortBy] = useState('최근순');
   const [priority, setPriority] = useState('최신 파일 우선');
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}> 
-      <Text style={styles.pageTitle}>정렬 기준</Text>
-      <Text style={styles.pageSubtitle}>정렬과 우선순위 처리 기준을 설정하세요.</Text>
+    <ScrollView style={[styles.screen, { backgroundColor: palette.background }]} contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 + 5 }]}> 
+      <Text style={[styles.pageTitle, { color: palette.text }]}>정렬 기준</Text>
+      <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>정렬과 우선순위 처리 기준을 설정하세요.</Text>
 
-      <View style={styles.card}>
-        <Text style={styles.groupTitle}>정렬 기준 변경</Text>
+      <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}> 
+        <Text style={[styles.groupTitle, { color: palette.text }]}>정렬 기준 변경</Text>
         <View style={styles.wrap}>
           {sortCandidates.map((item) => (
             <Pressable
               key={item}
               onPress={() => setSortBy(item)}
-              style={[styles.chip, sortBy === item && styles.activeChip]}
+              style={[
+                styles.chip,
+                { borderColor: palette.border, backgroundColor: palette.card },
+                sortBy === item && [styles.activeChip, { backgroundColor: palette.main, borderColor: palette.main }],
+              ]}
             >
-              <Text style={[styles.chipLabel, sortBy === item && styles.activeChipLabel]}>{item}</Text>
+              <Text style={[styles.chipLabel, { color: palette.textMuted }, sortBy === item && [styles.activeChipLabel, { color: palette.text }]]}>{item}</Text>
             </Pressable>
           ))}
         </View>
 
-        <Text style={styles.groupTitle}>우선순위 처리 기준 변경</Text>
+        <Text style={[styles.groupTitle, { color: palette.text }]}>우선순위 처리 기준 변경</Text>
         <View style={styles.wrap}>
           {priorityCandidates.map((item) => (
             <Pressable
               key={item}
               onPress={() => setPriority(item)}
-              style={[styles.chip, priority === item && styles.activeChip]}
+              style={[
+                styles.chip,
+                { borderColor: palette.border, backgroundColor: palette.card },
+                priority === item && [styles.activeChip, { backgroundColor: palette.main, borderColor: palette.main }],
+              ]}
             >
-              <Text style={[styles.chipLabel, priority === item && styles.activeChipLabel]}>{item}</Text>
+              <Text style={[styles.chipLabel, { color: palette.textMuted }, priority === item && [styles.activeChipLabel, { color: palette.text }]]}>{item}</Text>
             </Pressable>
           ))}
         </View>
@@ -50,7 +59,6 @@ export default function SortPreferenceScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   content: {
     paddingHorizontal: spacing.md,
@@ -58,24 +66,19 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     fontSize: 26,
-    color: colors.text,
     fontWeight: '800',
   },
   pageSubtitle: {
     marginTop: spacing.xs,
     marginBottom: spacing.md,
-    color: colors.textMuted,
   },
   card: {
-    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.lg,
     padding: spacing.md,
     ...shadows.card,
   },
   groupTitle: {
-    color: colors.text,
     fontWeight: '700',
     marginBottom: spacing.xs,
     marginTop: spacing.xs,
@@ -90,21 +93,15 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     borderRadius: radius.xl,
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: '#fff',
     marginRight: spacing.xs,
     marginBottom: spacing.xs,
   },
   activeChip: {
-    backgroundColor: colors.main,
-    borderColor: colors.main,
   },
   chipLabel: {
     fontSize: 12,
-    color: colors.textMuted,
     fontWeight: '600',
   },
   activeChipLabel: {
-    color: colors.text,
   },
 });

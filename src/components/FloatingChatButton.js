@@ -1,10 +1,17 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, radius, shadows, spacing } from '../styles/theme';
+import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
-export default function FloatingChatButton({ onPress, onLongPress, showDelete, onPressDelete }) {
+export default function FloatingChatButton({ onPress, onLongPress, showDelete, onPressDelete, darkMode }) {
+  const palette = getPalette(darkMode);
+
   return (
     <View style={styles.wrapper}>
-      <Pressable style={styles.button} onPress={onPress} onLongPress={onLongPress} delayLongPress={500}>
+      <Pressable
+        style={[styles.button, { backgroundColor: palette.point }]}
+        onPress={onPress}
+        onLongPress={onLongPress}
+        delayLongPress={500}
+      >
         <View style={styles.inner}>
           <Text style={styles.emoji}>AI</Text>
         </View>
@@ -32,7 +39,6 @@ const styles = StyleSheet.create({
     width: 62,
     height: 62,
     borderRadius: radius.xl,
-    backgroundColor: colors.point,
     justifyContent: 'center',
     alignItems: 'center',
     ...shadows.card,
@@ -58,15 +64,15 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#2f2a24',
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#fff',
+    borderColor: '#d0d0d0',
     ...shadows.card,
   },
   deleteText: {
-    color: '#fff',
+    color: '#7a7a7a',
     fontSize: 12,
     fontWeight: '800',
     lineHeight: 13,

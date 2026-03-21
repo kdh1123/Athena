@@ -1,12 +1,14 @@
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import * as DocumentPicker from 'expo-document-picker';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import { categoryOptions, fileItems } from '../styles/mockData';
-import { colors, radius, shadows, spacing } from '../styles/theme';
+import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
-export default function FileScreen({ navigation }) {
+export default function FileScreen({ navigation, darkMode }) {
   const insets = useSafeAreaInsets();
+  const palette = getPalette(darkMode);
   const [selectedTag, setSelectedTag] = useState('전체');
   const [customTags, setCustomTags] = useState([]);
   const [showTagInput, setShowTagInput] = useState(false);
@@ -22,7 +24,7 @@ export default function FileScreen({ navigation }) {
     ...customTags,
   ];
 
-  const latestFive = useMemo(() => {
+  const filteredFiles = useMemo(() => {
     const sorted = [...fileItems].sort(
       (a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime()
     );
@@ -42,17 +44,28 @@ export default function FileScreen({ navigation }) {
     return filtered.slice(0, 5);
   }, [selectedTag]);
 
+  const onImportFile = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      copyToCacheDirectory: true,
+      multiple: false,
+    });
+
+    if (!result.canceled && result.assets?.length) {
+      Alert.alert('파일 선택 완료', `${result.assets[0].name} 파일을 불러왔습니다.`);
+    }
+  };
+
   return (
     <ScrollView
-      style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}
+      style={[styles.screen, { backgroundColor: palette.background }]}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 + 5 }]}
     >
-      <Text style={styles.pageTitle}>파일</Text>
-      <Text style={styles.pageSubtitle}>전체 파일을 최신순으로 빠르게 확인하고 태그로 분류하세요.</Text>
+      <Text style={[styles.pageTitle, { color: palette.text }]}>파일</Text>
+      <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>전체 파일을 최신순으로 빠르게 확인하고 태그로 분류하세요.</Text>
 
-      <Pressable style={styles.uploadBox}>
-        <Text style={styles.uploadTitle}>파일 불러오기</Text>
-        <Text style={styles.uploadSub}>탭해서 사진/문서 파일을 가져오세요. (UI)</Text>
+      <Pressable style={[styles.uploadBox, { borderColor: palette.border, backgroundColor: darkMode ? '#151c27' : '#fffef8' }]} onPress={onImportFile}>
+        <Text style={[styles.uploadTitle, { color: palette.text }]}>파일 불러오기</Text>
+        <Text style={[styles.uploadSub, { color: palette.textMuted }]}>탭해서 파일 선택 창을 열 수 있습니다.</Text>
       </Pressable>
 
       <SectionHeader
@@ -66,11 +79,11 @@ export default function FileScreen({ navigation }) {
             value={tagInput}
             onChangeText={setTagInput}
             placeholder="새 태그 입력 (예: 여행)"
-            placeholderTextColor={colors.textMuted}
-            style={styles.tagInput}
+            placeholderTextColor={palette.textMuted}
+            style={[styles.tagInput, { borderColor: palette.border, backgroundColor: palette.card, color: palette.text }]}
           />
           <Pressable
-            style={styles.createButton}
+            style={[styles.createButton, { backgroundColor: palette.point }]}
             onPress={() => {
               const clean = tagInput.trim();
               if (!clean) {
@@ -95,21 +108,25 @@ export default function FileScreen({ navigation }) {
           <Pressable
             key={tag}
             onPress={() => setSelectedTag(tag)}
-            style={[styles.chip, selectedTag === tag && styles.activeChip]}
+            style={[
+              styles.chip,
+              { borderColor: palette.border, backgroundColor: palette.card },
+              selectedTag === tag && [styles.activeChip, { backgroundColor: palette.main, borderColor: palette.main }],
+            ]}
           >
-            <Text style={[styles.chipLabel, selectedTag === tag && styles.activeChipLabel]}>{tag}</Text>
+            <Text style={[styles.chipLabel, { color: palette.textMuted }, selectedTag === tag && [styles.activeChipLabel, { color: palette.text }]]}>{tag}</Text>
           </Pressable>
         ))}
       </View>
 
-      <SectionHeader title="최신 파일" rightLabel="모두 보기" onPressRight={() => navigation.navigate('FileList')} />
-      {latestFive.map((item) => (
-        <View key={item.id} style={styles.fileRow}>
+      <SectionHeader title="파일 목록" rightLabel="모두 보기" onPressRight={() => navigation.navigate('FileList', { darkMode })} />
+      {filteredFiles.map((item) => (
+        <View key={item.id} style={[styles.fileRow, { borderColor: palette.border, backgroundColor: palette.card }]}> 
           <View style={styles.fileHead}>
-            <Text style={styles.fileName} numberOfLines={1}>{item.name}</Text>
-            <Text style={styles.fileSize}>{item.size}</Text>
+            <Text style={[styles.fileName, { color: palette.text }]} numberOfLines={1}>{item.name}</Text>
+            <Text style={[styles.fileSize, { color: palette.point }]}>{item.size}</Text>
           </View>
-          <Text style={styles.fileMeta}>{item.category} · {item.modifiedAt} · #{item.tags.join(' #')}</Text>
+          <Text style={[styles.fileMeta, { color: palette.textMuted }]}>{item.category} · {item.modifiedAt} · #{item.tags.join(' #')}</Text>
         </View>
       ))}
     </ScrollView>

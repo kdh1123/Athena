@@ -1,7 +1,8 @@
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useState } from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors, radius, shadows, spacing } from '../styles/theme';
+import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
 export default function SettingsScreen({
   navigation,
@@ -11,61 +12,69 @@ export default function SettingsScreen({
   onToggleDarkMode,
 }) {
   const insets = useSafeAreaInsets();
+  const palette = getPalette(darkMode);
   const [notifications, setNotifications] = useState(true);
 
   return (
     <ScrollView
-      style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 }]}
+      style={[styles.screen, { backgroundColor: palette.background }]}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 + 5 }]}
     >
-      <Text style={styles.pageTitle}>설정</Text>
-      <Text style={styles.pageSubtitle}>필요한 항목만 간단하게 관리하세요.</Text>
+      <Text style={[styles.pageTitle, { color: palette.text }]}>설정</Text>
+      <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>필요한 항목만 간단하게 관리하세요.</Text>
 
-      <View style={styles.card}>
-        <Pressable style={styles.linkRow} onPress={() => navigation.navigate('PersonalInfo')}>
-          <Text style={styles.linkTitle}>개인정보</Text>
-          <Text style={styles.linkValue}>변경하기</Text>
-        </Pressable>
+      <Pressable
+        style={[styles.singleLinkCard, { backgroundColor: palette.card, borderColor: palette.border }]}
+        onPress={() => navigation.navigate('PersonalInfo')}
+      >
+        <Text style={[styles.linkTitle, { color: palette.text }]}>개인정보</Text>
+        <Ionicons name="chevron-forward" size={18} color={palette.textMuted} />
+      </Pressable>
 
-        <Pressable style={styles.linkRow} onPress={() => navigation.navigate('SortPreference')}>
-          <Text style={styles.linkTitle}>정렬 기준</Text>
-          <Text style={styles.linkValue}>기준 변경</Text>
-        </Pressable>
+      <Pressable
+        style={[styles.singleLinkCard, { backgroundColor: palette.card, borderColor: palette.border }]}
+        onPress={() => navigation.navigate('SortPreference')}
+      >
+        <Text style={[styles.linkTitle, { color: palette.text }]}>정렬 기준</Text>
+        <Ionicons name="chevron-forward" size={18} color={palette.textMuted} />
+      </Pressable>
 
-        <Pressable style={styles.linkRow} onPress={() => navigation.navigate('History')}>
-          <Text style={styles.linkTitle}>히스토리</Text>
-          <Text style={styles.linkValue}>기록 보기</Text>
-        </Pressable>
-      </View>
+      <Pressable
+        style={[styles.singleLinkCard, { backgroundColor: palette.card, borderColor: palette.border }]}
+        onPress={() => navigation.navigate('History')}
+      >
+        <Text style={[styles.linkTitle, { color: palette.text }]}>히스토리</Text>
+        <Ionicons name="chevron-forward" size={18} color={palette.textMuted} />
+      </Pressable>
 
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}> 
         <View style={styles.optionRow}>
-          <Text style={styles.optionLabel}>알림 설정</Text>
+          <Text style={[styles.optionLabel, { color: palette.text }]}>알림 설정</Text>
           <Switch
             value={notifications}
             onValueChange={setNotifications}
             trackColor={{ false: '#ddd', true: '#f6c0b2' }}
-            thumbColor={notifications ? colors.point : '#fff'}
+            thumbColor={notifications ? palette.point : '#fff'}
           />
         </View>
 
         <View style={styles.optionRow}>
-          <Text style={styles.optionLabel}>화면 모드</Text>
+          <Text style={[styles.optionLabel, { color: palette.text }]}>화면 모드</Text>
           <Switch
             value={darkMode}
             onValueChange={onToggleDarkMode}
             trackColor={{ false: '#c3fcf1', true: '#f6c0b2' }}
-            thumbColor={darkMode ? colors.point : '#fff'}
+            thumbColor={darkMode ? palette.point : '#fff'}
           />
         </View>
 
         <View style={styles.optionRow}>
-          <Text style={styles.optionLabel}>AI 아이콘 활성화</Text>
+          <Text style={[styles.optionLabel, { color: palette.text }]}>AI 아이콘 활성화</Text>
           <Switch
             value={aiButtonEnabled}
             onValueChange={onToggleAiButton}
             trackColor={{ false: '#ddd', true: '#f6c0b2' }}
-            thumbColor={aiButtonEnabled ? colors.point : '#fff'}
+            thumbColor={aiButtonEnabled ? palette.point : '#fff'}
           />
         </View>
       </View>
@@ -76,7 +85,6 @@ export default function SettingsScreen({
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: colors.background,
   },
   content: {
     padding: spacing.md,
@@ -84,42 +92,32 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     fontSize: 26,
-    color: colors.text,
     fontWeight: '800',
   },
   pageSubtitle: {
     marginTop: spacing.xs,
     marginBottom: spacing.md,
-    color: colors.textMuted,
   },
-  card: {
-    backgroundColor: colors.card,
+  singleLinkCard: {
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.lg,
-    padding: spacing.sm,
-    marginBottom: spacing.md,
-    ...shadows.card,
-  },
-  linkRow: {
     borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm,
-    backgroundColor: '#fffef8',
-    marginBottom: spacing.xs,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.sm,
+    ...shadows.card,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  linkTitle: {
-    color: colors.text,
-    fontWeight: '700',
+  card: {
+    borderWidth: 1,
+    borderRadius: radius.lg,
+    padding: spacing.sm,
+    marginTop: spacing.xs,
+    marginBottom: spacing.md,
+    ...shadows.card,
   },
-  linkValue: {
-    color: colors.point,
-    fontSize: 12,
+  linkTitle: {
     fontWeight: '700',
   },
   optionRow: {
@@ -129,7 +127,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   optionLabel: {
-    color: colors.text,
     fontWeight: '600',
   },
 });
