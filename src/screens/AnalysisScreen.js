@@ -1,10 +1,11 @@
 import { Animated, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import SectionHeader from '../components/SectionHeader';
 import { analysisRecommendations } from '../styles/mockData';
-import { getPalette, radius, shadows, spacing } from '../styles/theme';
+import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -15,6 +16,10 @@ function DonutChart({ usage, revealProgress, darkMode }) {
   const center = size / 2;
   const circumference = 2 * Math.PI * radius;
   const palette = getPalette(darkMode);
+  const animatedDashOffset = revealProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [circumference, 0],
+  });
 
   let offsetSum = 0;
 
@@ -52,7 +57,7 @@ function DonutChart({ usage, revealProgress, darkMode }) {
           stroke={palette.background}
           strokeWidth={strokeWidth + 2}
           strokeDasharray={`${circumference} ${circumference}`}
-          strokeDashoffset={Animated.multiply(revealProgress, circumference)}
+          strokeDashoffset={animatedDashOffset}
           transform={`rotate(180 ${center} ${center}) scale(-1 1)`}
         />
       </Svg>
@@ -85,14 +90,18 @@ export default function AnalysisScreen({ navigation, darkMode }) {
   const revealProgress = useRef(new Animated.Value(0)).current;
   const previewRecommendations = analysisRecommendations.slice(0, 4);
 
-  useEffect(() => {
-    revealProgress.setValue(0);
-    Animated.timing(revealProgress, {
-      toValue: 1,
-      duration: 900,
-      useNativeDriver: false,
-    }).start();
-  }, [revealProgress]);
+  useFocusEffect(
+    useCallback(() => {
+      revealProgress.setValue(0);
+      Animated.timing(revealProgress, {
+        toValue: 1,
+        duration: 900,
+        useNativeDriver: false,
+      }).start();
+
+      return () => {};
+    }, [revealProgress])
+  );
 
   return (
     <ScrollView

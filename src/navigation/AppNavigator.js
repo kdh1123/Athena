@@ -12,19 +12,17 @@ import HistoryScreen from '../screens/HistoryScreen';
 import RecommendationListScreen from '../screens/RecommendationListScreen';
 import DeviceCapacityScreen from '../screens/DeviceCapacityScreen';
 import PersonalInfoScreen from '../screens/PersonalInfoScreen';
-import SortPreferenceScreen from '../screens/SortPreferenceScreen';
 import AIChatScreen from '../screens/AIChatScreen';
 import FileListScreen from '../screens/FileListScreen';
 import FavoriteListScreen from '../screens/FavoriteListScreen';
 import AnalysisRecommendationScreen from '../screens/AnalysisRecommendationScreen';
-import FloatingChatButton from '../components/FloatingChatButton';
 import { getPalette } from '../styles/theme';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const navigationRef = createNavigationContainerRef();
 
-function TabNavigator({ aiButtonEnabled, onToggleAiButton, darkMode, onToggleDarkMode }) {
+function TabNavigator({ darkMode, onToggleDarkMode }) {
   const palette = getPalette(darkMode);
 
   return (
@@ -44,6 +42,7 @@ function TabNavigator({ aiButtonEnabled, onToggleAiButton, darkMode, onToggleDar
           const iconMap = {
             Home: 'home-outline',
             File: 'folder-open-outline',
+            AI: 'chatbubble-ellipses-outline',
             Analysis: 'analytics-outline',
             Settings: 'settings-outline',
           };
@@ -57,6 +56,9 @@ function TabNavigator({ aiButtonEnabled, onToggleAiButton, darkMode, onToggleDar
       <Tab.Screen name="File" options={{ title: '파일' }}>
         {(props) => <FileScreen {...props} darkMode={darkMode} />}
       </Tab.Screen>
+      <Tab.Screen name="AI" options={{ title: 'AI' }}>
+        {(props) => <AIChatScreen {...props} darkMode={darkMode} />}
+      </Tab.Screen>
       <Tab.Screen name="Analysis" options={{ title: '분석' }}>
         {(props) => <AnalysisScreen {...props} darkMode={darkMode} />}
       </Tab.Screen>
@@ -64,8 +66,6 @@ function TabNavigator({ aiButtonEnabled, onToggleAiButton, darkMode, onToggleDar
         {(props) => (
           <SettingsScreen
             {...props}
-            aiButtonEnabled={aiButtonEnabled}
-            onToggleAiButton={onToggleAiButton}
             darkMode={darkMode}
             onToggleDarkMode={onToggleDarkMode}
           />
@@ -76,9 +76,7 @@ function TabNavigator({ aiButtonEnabled, onToggleAiButton, darkMode, onToggleDar
 }
 
 export default function AppNavigator() {
-  const [aiButtonEnabled, setAiButtonEnabled] = useState(true);
-  const [aiButtonDeleteMode, setAiButtonDeleteMode] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
 
   const palette = getPalette(darkMode);
 
@@ -115,8 +113,6 @@ export default function AppNavigator() {
           {(props) => (
             <TabNavigator
               {...props}
-              aiButtonEnabled={aiButtonEnabled}
-              onToggleAiButton={setAiButtonEnabled}
               darkMode={darkMode}
               onToggleDarkMode={setDarkMode}
             />
@@ -136,12 +132,6 @@ export default function AppNavigator() {
         <Stack.Screen name="PersonalInfo" options={{ title: '개인정보' }}>
           {(props) => <PersonalInfoScreen {...props} darkMode={darkMode} />}
         </Stack.Screen>
-        <Stack.Screen name="SortPreference" options={{ title: '정렬 기준' }}>
-          {(props) => <SortPreferenceScreen {...props} darkMode={darkMode} />}
-        </Stack.Screen>
-        <Stack.Screen name="AIChat" options={{ title: 'Athena AI' }}>
-          {(props) => <AIChatScreen {...props} darkMode={darkMode} />}
-        </Stack.Screen>
         <Stack.Screen name="FileList" options={{ title: '파일 목록' }}>
           {(props) => <FileListScreen {...props} darkMode={darkMode} />}
         </Stack.Screen>
@@ -152,27 +142,6 @@ export default function AppNavigator() {
           {(props) => <AnalysisRecommendationScreen {...props} />}
         </Stack.Screen>
       </Stack.Navigator>
-
-      {aiButtonEnabled ? (
-        <FloatingChatButton
-          onPress={() => {
-            if (aiButtonDeleteMode) {
-              setAiButtonDeleteMode(false);
-              return;
-            }
-            if (navigationRef.isReady()) {
-              navigationRef.navigate('AIChat');
-            }
-          }}
-          onLongPress={() => setAiButtonDeleteMode(true)}
-          showDelete={aiButtonDeleteMode}
-          onPressDelete={() => {
-            setAiButtonDeleteMode(false);
-            setAiButtonEnabled(false);
-          }}
-          darkMode={darkMode}
-        />
-      ) : null}
     </NavigationContainer>
   );
 }

@@ -6,8 +6,6 @@ import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
 export default function SettingsScreen({
   navigation,
-  aiButtonEnabled,
-  onToggleAiButton,
   darkMode,
   onToggleDarkMode,
 }) {
@@ -28,14 +26,6 @@ export default function SettingsScreen({
         onPress={() => navigation.navigate('PersonalInfo')}
       >
         <Text style={[styles.linkTitle, { color: palette.text }]}>개인정보</Text>
-        <Ionicons name="chevron-forward" size={18} color={palette.textMuted} />
-      </Pressable>
-
-      <Pressable
-        style={[styles.singleLinkCard, { backgroundColor: palette.card, borderColor: palette.border }]}
-        onPress={() => navigation.navigate('SortPreference')}
-      >
-        <Text style={[styles.linkTitle, { color: palette.text }]}>정렬 기준</Text>
         <Ionicons name="chevron-forward" size={18} color={palette.textMuted} />
       </Pressable>
 
@@ -65,16 +55,6 @@ export default function SettingsScreen({
             onValueChange={onToggleDarkMode}
             trackColor={{ false: '#c3fcf1', true: '#f6c0b2' }}
             thumbColor={darkMode ? palette.point : '#fff'}
-          />
-        </View>
-
-        <View style={styles.optionRow}>
-          <Text style={[styles.optionLabel, { color: palette.text }]}>AI 아이콘 활성화</Text>
-          <Switch
-            value={aiButtonEnabled}
-            onValueChange={onToggleAiButton}
-            trackColor={{ false: '#ddd', true: '#f6c0b2' }}
-            thumbColor={aiButtonEnabled ? palette.point : '#fff'}
           />
         </View>
       </View>

@@ -4,15 +4,20 @@ import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import { categoryOptions, fileItems } from '../styles/mockData';
-import { getPalette, radius, shadows, spacing } from '../styles/theme';
+import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
 export default function FileScreen({ navigation, darkMode }) {
   const insets = useSafeAreaInsets();
   const palette = getPalette(darkMode);
   const [selectedTag, setSelectedTag] = useState('전체');
+  const [sortBy, setSortBy] = useState('최근순');
+  const [priority, setPriority] = useState('최신 파일 우선');
   const [customTags, setCustomTags] = useState([]);
   const [showTagInput, setShowTagInput] = useState(false);
   const [tagInput, setTagInput] = useState('');
+
+  const sortCandidates = ['최근순', '용량순', '이름순'];
+  const priorityCandidates = ['최신 파일 우선', '중요 태그 우선', '대용량 우선'];
 
   const tags = [
     '전체',
@@ -25,9 +30,17 @@ export default function FileScreen({ navigation, darkMode }) {
   ];
 
   const filteredFiles = useMemo(() => {
-    const sorted = [...fileItems].sort(
-      (a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime()
-    );
+    const sorted = [...fileItems].sort((a, b) => {
+      if (sortBy === '용량순') {
+        return parseFloat(b.size) - parseFloat(a.size);
+      }
+
+      if (sortBy === '이름순') {
+        return a.name.localeCompare(b.name, 'ko');
+      }
+
+      return new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime();
+    });
 
     const filtered = sorted.filter((item) => {
       if (selectedTag === '전체') {
@@ -41,8 +54,24 @@ export default function FileScreen({ navigation, darkMode }) {
       return item.category === selectedTag;
     });
 
-    return filtered.slice(0, 5);
-  }, [selectedTag]);
+    const prioritized = filtered.sort((a, b) => {
+      if (priority === '중요 태그 우선') {
+        const aScore = a.tags.includes('중요') ? 1 : 0;
+        const bScore = b.tags.includes('중요') ? 1 : 0;
+        return bScore - aScore;
+      }
+
+      if (priority === '대용량 우선') {
+        const aScore = a.tags.includes('대용량') ? 1 : 0;
+        const bScore = b.tags.includes('대용량') ? 1 : 0;
+        return bScore - aScore;
+      }
+
+      return new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime();
+    });
+
+    return prioritized.slice(0, 5);
+  }, [priority, selectedTag, sortBy]);
 
   const onImportFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
@@ -117,6 +146,42 @@ export default function FileScreen({ navigation, darkMode }) {
             <Text style={[styles.chipLabel, { color: palette.textMuted }, selectedTag === tag && [styles.activeChipLabel, { color: palette.text }]]}>{tag}</Text>
           </Pressable>
         ))}
+      </View>
+
+      <View style={styles.sortBlock}>
+        <Text style={[styles.sortTitle, { color: palette.text }]}>정렬 기준</Text>
+        <View style={styles.rowWrap}>
+          {sortCandidates.map((item) => (
+            <Pressable
+              key={item}
+              onPress={() => setSortBy(item)}
+              style={[
+                styles.chip,
+                { borderColor: palette.border, backgroundColor: palette.card },
+                sortBy === item && [styles.activeChip, { backgroundColor: palette.main, borderColor: palette.main }],
+              ]}
+            >
+              <Text style={[styles.chipLabel, { color: palette.textMuted }, sortBy === item && [styles.activeChipLabel, { color: palette.text }]]}>{item}</Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <Text style={[styles.sortTitle, { color: palette.text }]}>우선순위 처리 기준</Text>
+        <View style={styles.rowWrap}>
+          {priorityCandidates.map((item) => (
+            <Pressable
+              key={item}
+              onPress={() => setPriority(item)}
+              style={[
+                styles.chip,
+                { borderColor: palette.border, backgroundColor: palette.card },
+                priority === item && [styles.activeChip, { backgroundColor: palette.main, borderColor: palette.main }],
+              ]}
+            >
+              <Text style={[styles.chipLabel, { color: palette.textMuted }, priority === item && [styles.activeChipLabel, { color: palette.text }]]}>{item}</Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
 
       <SectionHeader title="파일 목록" rightLabel="모두 보기" onPressRight={() => navigation.navigate('FileList', { darkMode })} />
@@ -202,6 +267,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginBottom: spacing.md,
+  },
+  sortBlock: {
+    marginBottom: spacing.sm,
+  },
+  sortTitle: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: spacing.xs,
   },
   chip: {
     paddingHorizontal: spacing.sm,

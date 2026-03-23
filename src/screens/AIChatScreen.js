@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getPalette, radius, shadows, spacing } from '../styles/theme';
+import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
 const seedMessages = [
   {

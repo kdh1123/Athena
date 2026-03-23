@@ -1,16 +1,28 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import SectionHeader from '../components/SectionHeader';
 import { historyItems } from '../styles/mockData';
 import { colors, radius, shadows, spacing } from '../styles/theme';
 
 export default function HistoryScreen() {
+  const onUndo = () => {
+    Alert.alert('되돌리시겠습니까?', '', [
+      { text: '아니요', style: 'cancel' },
+      {
+        text: '예',
+        onPress: () => {
+          Alert.alert('성공적으로 완료되었습니다');
+        },
+      },
+    ]);
+  };
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.pageTitle}>정리 히스토리</Text>
+      <Text style={styles.pageTitle}>히스토리</Text>
       <Text style={styles.pageSubtitle}>과거 정리 기록 (더미 데이터)</Text>
 
       <View style={styles.wrapperCard}>
-        <SectionHeader title="기록 리스트" rightLabel={`${historyItems.length}건`} />
+        <SectionHeader title="리스트" rightLabel={`${historyItems.length}건`} />
         {historyItems.map((item) => (
           <View key={item.id} style={styles.historyCard}>
             <Text style={styles.historyDate}>{item.date}</Text>
@@ -18,8 +30,8 @@ export default function HistoryScreen() {
             <Text style={styles.historyMeta}>
               변경 {item.changedCount}개 · 확보 공간 {item.freedSpace}
             </Text>
-            <Pressable style={styles.undoButton}>
-              <Text style={styles.undoText}>되돌리기 (UI)</Text>
+            <Pressable style={styles.undoButton} onPress={onUndo}>
+              <Text style={styles.undoText}>되돌리기</Text>
             </Pressable>
           </View>
         ))}
