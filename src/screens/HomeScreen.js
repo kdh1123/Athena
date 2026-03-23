@@ -1,13 +1,29 @@
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import StorageBar from '../components/StorageBar';
-import { favoriteFiles, recentActivities, recommendedActions } from '../styles/mockData';
+import { favoriteFiles, fileItems, recentActivities, recommendedActions } from '../styles/mockData';
 import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
 export default function HomeScreen({ navigation, darkMode }) {
   const insets = useSafeAreaInsets();
   const palette = getPalette(darkMode);
+  const [searchText, setSearchText] = useState('');
+
+  const searchResults = useMemo(() => {
+    const needle = searchText.trim().toLowerCase();
+    if (!needle) {
+      return [];
+    }
+
+    return fileItems.filter((item) => {
+      const inName = item.name.toLowerCase().includes(needle);
+      const inCategory = item.category.toLowerCase().includes(needle);
+      const inTag = item.tags.some((tag) => tag.toLowerCase().includes(needle.replace('#', '')));
+      return inName || inCategory || inTag;
+    });
+  }, [searchText]);
 
   return (
     <ScrollView
@@ -18,16 +34,46 @@ export default function HomeScreen({ navigation, darkMode }) {
       <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>AI 기반 파일 관리 대시보드</Text>
 
       <TextInput
+        value={searchText}
+        onChangeText={setSearchText}
         placeholder="파일 이름, 태그, 카테고리 검색"
         placeholderTextColor={palette.textMuted}
         style={[styles.searchInput, { borderColor: palette.border, backgroundColor: palette.card, color: palette.text }]}
       />
+
+      {searchText.trim().length > 0 ? (
+        <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}>
+          <SectionHeader
+            title="검색 결과"
+            rightLabel={`${searchResults.length}개`}
+            titleColor={palette.text}
+            rightLabelColor={palette.point}
+          />
+          {searchResults.length === 0 ? (
+            <Text style={[styles.emptyText, { color: palette.textMuted }]}>검색 결과가 없습니다.</Text>
+          ) : (
+            searchResults.slice(0, 6).map((item) => (
+              <View
+                key={item.id}
+                style={[styles.favoriteRow, { borderColor: palette.border, backgroundColor: darkMode ? '#151c27' : '#fffef8' }]}
+              >
+                <Text style={[styles.favoriteName, { color: palette.text }]} numberOfLines={1}>{item.name}</Text>
+                <Text style={[styles.favoriteMeta, { color: palette.textMuted }]}>
+                  {item.category} · {item.size} · #{item.tags.join(' #')}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
+      ) : null}
 
       <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}> 
         <SectionHeader
           title="추천 정리"
           rightLabel="모두 보기"
           onPressRight={() => navigation.navigate('RecommendationList')}
+          titleColor={palette.text}
+          rightLabelColor={palette.point}
         />
         {recommendedActions.map((action) => (
           <View key={action.id} style={styles.recommendCard}>
@@ -41,7 +87,11 @@ export default function HomeScreen({ navigation, darkMode }) {
       </View>
 
       <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}> 
-        <SectionHeader title="기기 용량" onPressTitle={() => navigation.navigate('DeviceCapacity')} />
+        <SectionHeader
+          title="기기 용량"
+          onPressTitle={() => navigation.navigate('DeviceCapacity')}
+          titleColor={palette.text}
+        />
         <StorageBar usedGB={96} totalGB={128} />
       </View>
 
@@ -50,6 +100,8 @@ export default function HomeScreen({ navigation, darkMode }) {
           title="즐겨찾기"
           rightLabel="모두 보기"
           onPressRight={() => navigation.navigate('FavoriteList', { darkMode })}
+          titleColor={palette.text}
+          rightLabelColor={palette.point}
         />
         {favoriteFiles.slice(0, 2).map((item) => (
           <View
@@ -63,7 +115,7 @@ export default function HomeScreen({ navigation, darkMode }) {
       </View>
 
       <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}> 
-        <SectionHeader title="최근 활동" />
+        <SectionHeader title="최근 활동" titleColor={palette.text} />
         {recentActivities.map((activity) => (
           <View key={activity.id} style={styles.activityRow}>
             <Text style={[styles.activityText, { color: palette.text }]}>{activity.text}</Text>
@@ -157,6 +209,11 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 12,
     marginTop: 2,
+  },
+  emptyText: {
+    fontSize: 13,
+    fontWeight: '600',
+    paddingVertical: spacing.sm,
   },
   activityRow: {
     flexDirection: 'row',

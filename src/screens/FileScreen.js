@@ -101,6 +101,8 @@ export default function FileScreen({ navigation, darkMode }) {
         title="태그 분류"
         rightLabel="태그 생성하기"
         onPressRight={() => setShowTagInput((prev) => !prev)}
+        titleColor={palette.text}
+        rightLabelColor={palette.point}
       />
       {showTagInput ? (
         <View style={styles.tagComposer}>
@@ -184,7 +186,13 @@ export default function FileScreen({ navigation, darkMode }) {
         </View>
       </View>
 
-      <SectionHeader title="파일 목록" rightLabel="모두 보기" onPressRight={() => navigation.navigate('FileList', { darkMode })} />
+      <SectionHeader
+        title="파일 목록"
+        rightLabel="모두 보기"
+        onPressRight={() => navigation.navigate('FileList', { darkMode })}
+        titleColor={palette.text}
+        rightLabelColor={palette.point}
+      />
       {filteredFiles.map((item) => (
         <View key={item.id} style={[styles.fileRow, { borderColor: palette.border, backgroundColor: palette.card }]}> 
           <View style={styles.fileHead}>

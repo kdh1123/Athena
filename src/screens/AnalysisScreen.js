@@ -20,11 +20,15 @@ function DonutChart({ usage, revealProgress, darkMode }) {
     inputRange: [0, 1],
     outputRange: [circumference, 0],
   });
+  const chartTranslateX = revealProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-28, 0],
+  });
 
   let offsetSum = 0;
 
   return (
-    <View style={styles.donutWrap}>
+    <Animated.View style={[styles.donutWrap, { opacity: revealProgress, transform: [{ translateX: chartTranslateX }] }]}> 
       <Svg width={size} height={size}>
         {usage.map((item) => {
           const segmentLength = circumference * (item.percent / 100);
@@ -71,7 +75,7 @@ function DonutChart({ usage, revealProgress, darkMode }) {
           </View>
         ))}
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -119,7 +123,7 @@ export default function AnalysisScreen({ navigation, darkMode }) {
       </View>
 
       <View style={[styles.sectionCard, { backgroundColor: palette.card, borderColor: palette.border }]}> 
-        <SectionHeader title="용량 분포" />
+        <SectionHeader title="용량 분포" titleColor={palette.text} />
         <DonutChart usage={usage} revealProgress={revealProgress} darkMode={darkMode} />
       </View>
 
@@ -128,6 +132,8 @@ export default function AnalysisScreen({ navigation, darkMode }) {
           title="개선 제안"
           rightLabel="모두 보기"
           onPressRight={() => navigation.navigate('AnalysisRecommendation', { darkMode })}
+          titleColor={palette.text}
+          rightLabelColor={palette.point}
         />
         {previewRecommendations.length === 0 ? (
           <Text style={[styles.emptyText, { color: palette.success }]}>사용자님의 파일은 정말 깨끗해요!</Text>
