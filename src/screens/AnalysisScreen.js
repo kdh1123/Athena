@@ -1,11 +1,11 @@
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import SectionHeader from '../components/SectionHeader';
 import { createAutomaticAnalysis } from '../services/aiService';
-import { analysisRecommendations } from '../styles/mockData';
+import { useFileLibrary } from '../context/FileLibraryContext';
 import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -21,15 +21,11 @@ function DonutChart({ usage, revealProgress, darkMode }) {
     inputRange: [0, 1],
     outputRange: [circumference, 0],
   });
-  const chartTranslateX = revealProgress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-28, 0],
-  });
 
   let offsetSum = 0;
 
   return (
-    <Animated.View style={[styles.donutWrap, { opacity: revealProgress, transform: [{ translateX: chartTranslateX }] }]}> 
+    <View style={styles.donutWrap}> 
       <Svg width={size} height={size}>
         {usage.map((item) => {
           const segmentLength = circumference * (item.percent / 100);
@@ -76,34 +72,30 @@ function DonutChart({ usage, revealProgress, darkMode }) {
           </View>
         ))}
       </View>
-    </Animated.View>
+    </View>
   );
 }
 
 export default function AnalysisScreen({ navigation, darkMode }) {
   const insets = useSafeAreaInsets();
   const palette = getPalette(darkMode);
-  const usage = useMemo(
-    () => [
-      { label: '이미지', percent: 42, color: '#fa8e73' },
-      { label: '문서', percent: 18, color: '#c7a58b' },
-      { label: '오디오', percent: 11, color: '#8aa7c8' },
-      { label: '기타', percent: 29, color: '#8ebf9f' },
-    ],
-    []
-  );
+  const { files, usage, analysisRecommendations } = useFileLibrary();
   const revealProgress = useRef(new Animated.Value(0)).current;
   const previewRecommendations = analysisRecommendations.slice(0, 4);
-  const [aiAnalysis, setAiAnalysis] = useState(() => createAutomaticAnalysis());
+  const [aiAnalysis, setAiAnalysis] = useState(() => createAutomaticAnalysis(files));
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const runAutomaticAnalysis = useCallback(() => {
     setIsRefreshing(true);
     setTimeout(() => {
-      setAiAnalysis(createAutomaticAnalysis());
+      setAiAnalysis(createAutomaticAnalysis(files));
       setIsRefreshing(false);
     }, 360);
-  }, []);
+  }, [files]);
+
+  useEffect(() => {
+    setAiAnalysis(createAutomaticAnalysis(files));
+  }, [files]);
 
   useFocusEffect(
     useCallback(() => {
@@ -121,7 +113,7 @@ export default function AnalysisScreen({ navigation, darkMode }) {
   return (
     <ScrollView
       style={[styles.screen, { backgroundColor: palette.background }]}
-      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 + 5 }]}
+      contentContainerStyle={[styles.content, { paddingTop: Math.max(spacing.md, insets.top + spacing.xs) }]}
     >
       <Text style={[styles.pageTitle, { color: palette.text }]}>파일 분석</Text>
       <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>기기 상태 기반 인사이트</Text>
@@ -182,7 +174,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.md,
-    paddingBottom: 110,
+    paddingBottom: 82,
   },
   pageTitle: {
     fontSize: 26,

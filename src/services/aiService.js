@@ -1,4 +1,4 @@
-import { analysisRecommendations, fileItems, parseFileSizeToMB } from '../styles/mockData';
+import { parseFileSizeToMB } from '../context/FileLibraryContext';
 
 function summarizeFiles(files) {
   const largeFiles = files
@@ -15,7 +15,7 @@ function summarizeFiles(files) {
   };
 }
 
-export async function createChatReply(message, files = fileItems) {
+export async function createChatReply(message, files = []) {
   const text = message.trim();
   const summary = summarizeFiles(files);
 
@@ -41,7 +41,7 @@ export async function createChatReply(message, files = fileItems) {
   return '파일 목록을 기준으로 정리 우선순위, 태그 추천, 보관함 이동 후보를 함께 제안할 수 있습니다. “대용량 파일부터 정리해줘”처럼 요청해보세요.';
 }
 
-export function createAutomaticAnalysis(files = fileItems) {
+export function createAutomaticAnalysis(files = []) {
   const summary = summarizeFiles(files);
   const totalMB = files.reduce((sum, item) => sum + parseFileSizeToMB(item.size), 0);
   const largeMB = summary.largeFiles.reduce((sum, item) => sum + parseFileSizeToMB(item.size), 0);
@@ -51,7 +51,7 @@ export function createAutomaticAnalysis(files = fileItems) {
       ? '대용량 파일이 전체 사용량의 절반 이상입니다. 클라우드 이동 후보를 먼저 검토하세요.'
       : '파일 용량 분포는 비교적 안정적입니다. 최근 미사용 파일 위주로 정리하세요.',
     `100MB 이상 파일 ${summary.largeFiles.length}개를 우선 점검 대상으로 표시했습니다.`,
-    analysisRecommendations[0].description,
+    '카테고리와 용량 기준을 함께 적용하면 정리 우선순위를 더 정확하게 잡을 수 있습니다.',
   ];
 
   return {

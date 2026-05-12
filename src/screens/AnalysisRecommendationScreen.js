@@ -1,12 +1,13 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
-import { analysisRecommendations } from '../styles/mockData';
+import { useFileLibrary } from '../context/FileLibraryContext';
 import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
 export default function AnalysisRecommendationScreen({ darkMode }) {
   const insets = useSafeAreaInsets();
   const palette = getPalette(darkMode);
+  const { analysisRecommendations } = useFileLibrary();
 
   return (
     <ScrollView

@@ -4,13 +4,14 @@ import { colors, radius, spacing } from '../styles/theme';
 export default function StorageBar({ usedGB, totalGB }) {
   const usedRatio = Math.min(usedGB / totalGB, 1);
   const usedPercent = Math.round(usedRatio * 100);
+  const usedLabel = usedGB >= 1 ? `${usedGB.toFixed(1)}GB` : `${Math.round(usedGB * 1024)}MB`;
 
   return (
     <View style={styles.container}>
       <View style={styles.labels}>
         <Text style={styles.title}>저장 용량</Text>
         <Text style={styles.value}>
-          {usedGB}GB / {totalGB}GB ({usedPercent}%)
+          {usedLabel} / {totalGB}GB ({usedPercent}%)
         </Text>
       </View>
       <View style={styles.track}>

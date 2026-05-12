@@ -2,16 +2,17 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useMemo } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
-import { fileItems } from '../styles/mockData';
+import { useFileLibrary } from '../context/FileLibraryContext';
 import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
 export default function FileListScreen({ darkMode }) {
   const insets = useSafeAreaInsets();
   const palette = getPalette(darkMode);
+  const { files } = useFileLibrary();
 
   const sortedFiles = useMemo(
-    () => [...fileItems].sort((a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime()),
-    []
+    () => [...files].sort((a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime()),
+    [files]
   );
 
   return (
@@ -38,6 +39,9 @@ export default function FileListScreen({ darkMode }) {
             <Text style={[styles.fileMeta, { color: palette.textMuted }]}>{item.category} · {item.modifiedAt} · #{item.tags.join(' #')}</Text>
           </View>
         ))}
+        {sortedFiles.length === 0 ? (
+          <Text style={[styles.emptyText, { color: palette.textMuted }]}>파일 탭에서 실제 파일을 먼저 연동해주세요.</Text>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -88,5 +92,10 @@ const styles = StyleSheet.create({
   fileMeta: {
     marginTop: 4,
     fontSize: 12,
+  },
+  emptyText: {
+    fontSize: 13,
+    fontWeight: '600',
+    paddingVertical: spacing.sm,
   },
 });

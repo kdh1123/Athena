@@ -20,6 +20,7 @@ import SortPreferenceScreen from '../screens/SortPreferenceScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import { observeAuthState, signOutCurrentUser } from '../services/authService';
+import { FileLibraryProvider } from '../context/FileLibraryContext';
 import { getPalette } from '../styles/theme';
 
 const Tab = createBottomTabNavigator();
@@ -112,6 +113,7 @@ export default function AppNavigator() {
   }
 
   return (
+    <FileLibraryProvider>
     <NavigationContainer ref={navigationRef} theme={navTheme}>
       <Stack.Navigator
         screenOptions={{
@@ -146,7 +148,7 @@ export default function AppNavigator() {
               {(props) => <DeviceCapacityScreen {...props} darkMode={darkMode} />}
             </Stack.Screen>
             <Stack.Screen name="PersonalInfo" options={{ title: '개인정보' }}>
-              {(props) => <PersonalInfoScreen {...props} darkMode={darkMode} />}
+              {(props) => <PersonalInfoScreen {...props} darkMode={darkMode} currentUser={currentUser} />}
             </Stack.Screen>
             <Stack.Screen name="FileList" options={{ title: '파일 목록' }}>
               {(props) => <FileListScreen {...props} darkMode={darkMode} />}
@@ -173,5 +175,6 @@ export default function AppNavigator() {
         )}
       </Stack.Navigator>
     </NavigationContainer>
+    </FileLibraryProvider>
   );
 }

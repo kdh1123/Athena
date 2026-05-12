@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
-import { categoryOptions, fileItems, parseFileSizeToMB } from '../styles/mockData';
+import { categoryOptions, parseFileSizeToMB, useFileLibrary } from '../context/FileLibraryContext';
 import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
 export default function FileScreen({ navigation, darkMode }) {
@@ -15,6 +15,7 @@ export default function FileScreen({ navigation, darkMode }) {
   const [customTags, setCustomTags] = useState([]);
   const [showTagInput, setShowTagInput] = useState(false);
   const [tagInput, setTagInput] = useState('');
+  const { files, addFilesFromAssets } = useFileLibrary();
 
   const sortCandidates = ['최근순', '용량순', '이름순'];
   const priorityCandidates = ['최신 파일 우선', '중요 태그 우선', '대용량 우선'];
@@ -30,7 +31,7 @@ export default function FileScreen({ navigation, darkMode }) {
   ];
 
   const filteredFiles = useMemo(() => {
-    const sorted = [...fileItems].sort((a, b) => {
+    const sorted = [...files].sort((a, b) => {
       if (sortBy === '용량순') {
         return parseFileSizeToMB(b.size) - parseFileSizeToMB(a.size);
       }
@@ -71,16 +72,17 @@ export default function FileScreen({ navigation, darkMode }) {
     });
 
     return prioritized.slice(0, 5);
-  }, [priority, selectedTag, sortBy]);
+  }, [files, priority, selectedTag, sortBy]);
 
   const onImportFile = async () => {
     const result = await DocumentPicker.getDocumentAsync({
       copyToCacheDirectory: true,
-      multiple: false,
+      multiple: true,
     });
 
     if (!result.canceled && result.assets?.length) {
-      Alert.alert('파일 선택 완료', `${result.assets[0].name} 파일을 불러왔습니다.`);
+      const imported = addFilesFromAssets(result.assets);
+      Alert.alert('파일 연동 완료', `${imported.length}개 파일을 실제 선택 목록에 반영했습니다.`);
     }
   };
 
@@ -202,6 +204,9 @@ export default function FileScreen({ navigation, darkMode }) {
           <Text style={[styles.fileMeta, { color: palette.textMuted }]}>{item.category} · {item.modifiedAt} · #{item.tags.join(' #')}</Text>
         </View>
       ))}
+      {filteredFiles.length === 0 ? (
+        <Text style={[styles.emptyText, { color: palette.textMuted }]}>아직 연동된 파일이 없습니다. 파일 불러오기를 눌러 실제 파일을 선택하세요.</Text>
+      ) : null}
     </ScrollView>
   );
 }
@@ -335,5 +340,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
     color: colors.textMuted,
     fontSize: 12,
+  },
+  emptyText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    fontWeight: '600',
+    paddingVertical: spacing.md,
   },
 });
