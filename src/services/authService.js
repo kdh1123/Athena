@@ -20,6 +20,7 @@ export async function signUpWithEmail({ name, email, password }) {
 
   if (name) {
     await updateProfile(credential.user, { displayName: name });
+    await credential.user.reload();
   }
 
   return credential;

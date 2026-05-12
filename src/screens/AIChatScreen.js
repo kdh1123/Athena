@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createChatReply } from '../services/aiService';
+import { useFileLibrary } from '../context/FileLibraryContext';
 import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
 const DRAWER_WIDTH = 280;
@@ -50,6 +51,7 @@ export default function AIChatScreen({ darkMode }) {
     { id: 'room-2', title: '사진 정리 상담' },
     { id: 'room-3', title: '다운로드 폴더 점검' },
   ]);
+  const { files, addFilesFromAssets } = useFileLibrary();
 
   const drawerX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
 
@@ -131,7 +133,7 @@ export default function AIChatScreen({ darkMode }) {
     setInput('');
     setIsThinking(true);
 
-    const reply = await createChatReply(userText);
+    const reply = await createChatReply(userText, files);
     setMessages((prev) => [...prev, { id: createId('a'), role: 'assistant', text: reply }]);
     setIsThinking(false);
   };
@@ -150,9 +152,10 @@ export default function AIChatScreen({ darkMode }) {
 
     if (!result.canceled && result.assets?.length) {
       const picked = result.assets[0];
+      addFilesFromAssets([{ ...picked, name: picked.fileName || 'image.jpg', size: picked.fileSize || 0, mimeType: picked.mimeType || 'image/jpeg' }]);
       setMessages((prev) => [
         ...prev,
-        { id: createId('f'), role: 'user', text: `사진 첨부: ${picked.fileName || 'image.jpg'}` },
+        { id: createId('f'), role: 'user', text: `사진 첨부 및 연동: ${picked.fileName || 'image.jpg'}` },
       ]);
     }
   };
@@ -164,9 +167,10 @@ export default function AIChatScreen({ darkMode }) {
     });
 
     if (!result.canceled && result.assets?.length) {
+      addFilesFromAssets(result.assets);
       setMessages((prev) => [
         ...prev,
-        { id: createId('d'), role: 'user', text: `파일 첨부: ${result.assets[0].name}` },
+        { id: createId('d'), role: 'user', text: `파일 첨부 및 연동: ${result.assets[0].name}` },
       ]);
     }
   };

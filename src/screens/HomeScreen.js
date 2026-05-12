@@ -3,13 +3,14 @@ import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import StorageBar from '../components/StorageBar';
-import { favoriteFiles, fileItems, recentActivities, recommendedActions } from '../styles/mockData';
+import { useFileLibrary } from '../context/FileLibraryContext';
 import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
 export default function HomeScreen({ navigation, darkMode }) {
   const insets = useSafeAreaInsets();
   const palette = getPalette(darkMode);
   const [searchText, setSearchText] = useState('');
+  const { files, favorites, recentActivities, recommendedActions, totalBytes } = useFileLibrary();
 
   const searchResults = useMemo(() => {
     const needle = searchText.trim().toLowerCase();
@@ -17,18 +18,18 @@ export default function HomeScreen({ navigation, darkMode }) {
       return [];
     }
 
-    return fileItems.filter((item) => {
+    return files.filter((item) => {
       const inName = item.name.toLowerCase().includes(needle);
       const inCategory = item.category.toLowerCase().includes(needle);
       const inTag = item.tags.some((tag) => tag.toLowerCase().includes(needle.replace('#', '')));
       return inName || inCategory || inTag;
     });
-  }, [searchText]);
+  }, [files, searchText]);
 
   return (
     <ScrollView
       style={[styles.screen, { backgroundColor: palette.background }]}
-      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 + 5 }]}
+      contentContainerStyle={[styles.content, { paddingTop: Math.max(spacing.md, insets.top + spacing.xs) }]}
     >
       <Text style={[styles.pageTitle, { color: palette.text }]}>Athena</Text>
       <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>AI 기반 파일 관리 대시보드</Text>
@@ -84,6 +85,9 @@ export default function HomeScreen({ navigation, darkMode }) {
             </View>
           </View>
         ))}
+        {recommendedActions.length === 0 ? (
+          <Text style={[styles.emptyText, { color: palette.textMuted }]}>파일 탭에서 실제 파일을 연동하면 추천 정리가 표시됩니다.</Text>
+        ) : null}
       </View>
 
       <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}> 
@@ -92,7 +96,7 @@ export default function HomeScreen({ navigation, darkMode }) {
           onPressTitle={() => navigation.navigate('DeviceCapacity')}
           titleColor={palette.text}
         />
-        <StorageBar usedGB={96} totalGB={128} />
+        <StorageBar usedGB={totalBytes / 1024 / 1024 / 1024} totalGB={128} />
       </View>
 
       <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}> 
@@ -103,15 +107,18 @@ export default function HomeScreen({ navigation, darkMode }) {
           titleColor={palette.text}
           rightLabelColor={palette.point}
         />
-        {favoriteFiles.slice(0, 2).map((item) => (
+        {favorites.slice(0, 2).map((item) => (
           <View
             key={item.id}
             style={[styles.favoriteRow, { borderColor: palette.border, backgroundColor: darkMode ? '#151c27' : '#fffef8' }]}
           >
             <Text style={[styles.favoriteName, { color: palette.text }]} numberOfLines={1}>{item.name}</Text>
-            <Text style={[styles.favoriteMeta, { color: palette.textMuted }]}>{item.meta}</Text>
+            <Text style={[styles.favoriteMeta, { color: palette.textMuted }]}>{item.category} · {item.size}</Text>
           </View>
         ))}
+        {favorites.length === 0 ? (
+          <Text style={[styles.emptyText, { color: palette.textMuted }]}>즐겨찾기한 실제 파일이 아직 없습니다.</Text>
+        ) : null}
       </View>
 
       <View style={[styles.sectionBlock, { backgroundColor: palette.card, borderColor: palette.border }]}> 
@@ -122,6 +129,9 @@ export default function HomeScreen({ navigation, darkMode }) {
             <Text style={[styles.activityTime, { color: palette.textMuted }]}>{activity.time}</Text>
           </View>
         ))}
+        {recentActivities.length === 0 ? (
+          <Text style={[styles.emptyText, { color: palette.textMuted }]}>아직 연동된 파일 활동이 없습니다.</Text>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -134,7 +144,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.md,
-    paddingBottom: 110,
+    paddingBottom: 82,
   },
   pageTitle: {
     fontSize: 30,

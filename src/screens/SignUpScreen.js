@@ -12,10 +12,17 @@ export default function SignUpScreen({ navigation, darkMode }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const emailPattern = /^\S+@\S+$/;
+  const emailIsInvalid = email.trim().length > 0 && !emailPattern.test(email.trim());
 
   const submit = async () => {
     if (!name.trim() || !email.trim() || password.length < 6) {
       Alert.alert('입력 확인', '이름, 이메일, 6자리 이상의 비밀번호를 입력해주세요.');
+      return;
+    }
+
+    if (!emailPattern.test(email.trim())) {
+      Alert.alert('회원가입 실패', '이메일 형식이 지켜지지 않았습니다.');
       return;
     }
 
@@ -58,6 +65,9 @@ export default function SignUpScreen({ navigation, darkMode }) {
           placeholderTextColor={palette.textMuted}
           style={[styles.input, { borderColor: palette.border, color: palette.text }]}
         />
+        {emailIsInvalid ? (
+          <Text style={[styles.warningText, { color: palette.point }]}>이메일은 *****@**** 형식으로 입력해주세요.</Text>
+        ) : null}
         <TextInput
           value={password}
           onChangeText={setPassword}
@@ -113,6 +123,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 12,
     fontSize: 15,
+    marginBottom: spacing.sm,
+  },
+  warningText: {
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: -spacing.xs,
     marginBottom: spacing.sm,
   },
   primaryButton: {
