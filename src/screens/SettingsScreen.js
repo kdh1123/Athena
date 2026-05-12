@@ -37,6 +37,14 @@ export default function SettingsScreen({
         <Ionicons name="chevron-forward" size={18} color={palette.textMuted} />
       </Pressable>
 
+      <Pressable
+        style={[styles.singleLinkCard, { backgroundColor: palette.card, borderColor: palette.border }]}
+        onPress={() => navigation.navigate('SortPreference')}
+      >
+        <Text style={[styles.linkTitle, { color: palette.text }]}>정렬 기준</Text>
+        <Ionicons name="chevron-forward" size={18} color={palette.textMuted} />
+      </Pressable>
+
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}> 
         <View style={styles.optionRow}>
           <Text style={[styles.optionLabel, { color: palette.text }]}>알림 설정</Text>

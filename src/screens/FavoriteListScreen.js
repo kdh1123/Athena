@@ -4,9 +4,8 @@ import SectionHeader from '../components/SectionHeader';
 import { favoriteFiles } from '../styles/mockData';
 import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
-export default function FavoriteListScreen({ route }) {
+export default function FavoriteListScreen({ darkMode }) {
   const insets = useSafeAreaInsets();
-  const darkMode = route?.params?.darkMode ?? false;
   const palette = getPalette(darkMode);
 
   return (
@@ -18,7 +17,12 @@ export default function FavoriteListScreen({ route }) {
       <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>즐겨찾기한 파일 전체 목록입니다.</Text>
 
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}> 
-        <SectionHeader title="전체 즐겨찾기" rightLabel={`${favoriteFiles.length}개`} />
+        <SectionHeader
+          title="전체 즐겨찾기"
+          rightLabel={`${favoriteFiles.length}개`}
+          titleColor={palette.text}
+          rightLabelColor={palette.point}
+        />
         {favoriteFiles.map((item) => (
           <View key={item.id} style={[styles.row, { backgroundColor: darkMode ? '#151c27' : '#fffef8', borderColor: palette.border }]}> 
             <Text style={[styles.rowTitle, { color: palette.text }]} numberOfLines={1}>{item.name}</Text>

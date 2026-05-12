@@ -28,6 +28,10 @@ const seedMessages = [
   },
 ];
 
+function createId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export default function AIChatScreen({ darkMode }) {
   const insets = useSafeAreaInsets();
   const palette = getPalette(darkMode);
@@ -121,9 +125,9 @@ export default function AIChatScreen({ darkMode }) {
     const userText = input.trim();
     setMessages((prev) => [
       ...prev,
-      { id: `u-${Date.now()}`, role: 'user', text: userText },
+      { id: createId('u'), role: 'user', text: userText },
       {
-        id: `a-${Date.now()}`,
+        id: createId('a'),
         role: 'assistant',
         text: '요청을 확인했어요. 파일 우선순위와 정리 제안을 바로 계산해볼게요. (데모 응답)',
       },
@@ -147,7 +151,7 @@ export default function AIChatScreen({ darkMode }) {
       const picked = result.assets[0];
       setMessages((prev) => [
         ...prev,
-        { id: `f-${Date.now()}`, role: 'user', text: `사진 첨부: ${picked.fileName || 'image.jpg'}` },
+        { id: createId('f'), role: 'user', text: `사진 첨부: ${picked.fileName || 'image.jpg'}` },
       ]);
     }
   };
@@ -161,7 +165,7 @@ export default function AIChatScreen({ darkMode }) {
     if (!result.canceled && result.assets?.length) {
       setMessages((prev) => [
         ...prev,
-        { id: `d-${Date.now()}`, role: 'user', text: `파일 첨부: ${result.assets[0].name}` },
+        { id: createId('d'), role: 'user', text: `파일 첨부: ${result.assets[0].name}` },
       ]);
     }
   };
@@ -258,7 +262,7 @@ export default function AIChatScreen({ darkMode }) {
           <Pressable
             style={[styles.newChatButton, { backgroundColor: surface }]}
             onPress={() => {
-              setChatRooms((prev) => [{ id: `room-${Date.now()}`, title: '새 채팅' }, ...prev]);
+              setChatRooms((prev) => [{ id: createId('room'), title: '새 채팅' }, ...prev]);
               closeDrawer();
             }}
           >

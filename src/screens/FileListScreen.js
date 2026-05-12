@@ -23,7 +23,12 @@ export default function FileListScreen({ darkMode }) {
       <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>최신순 전체 파일을 확인하세요.</Text>
 
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}> 
-        <SectionHeader title="전체 파일" rightLabel={`${sortedFiles.length}개`} />
+        <SectionHeader
+          title="전체 파일"
+          rightLabel={`${sortedFiles.length}개`}
+          titleColor={palette.text}
+          rightLabelColor={palette.point}
+        />
         {sortedFiles.map((item) => (
           <View key={item.id} style={[styles.fileRow, { borderColor: palette.border, backgroundColor: darkMode ? '#151c27' : '#fffef8' }]}> 
             <View style={styles.fileHead}>

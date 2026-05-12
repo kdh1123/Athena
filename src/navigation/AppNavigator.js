@@ -16,6 +16,7 @@ import AIChatScreen from '../screens/AIChatScreen';
 import FileListScreen from '../screens/FileListScreen';
 import FavoriteListScreen from '../screens/FavoriteListScreen';
 import AnalysisRecommendationScreen from '../screens/AnalysisRecommendationScreen';
+import SortPreferenceScreen from '../screens/SortPreferenceScreen';
 import { getPalette } from '../styles/theme';
 
 const Tab = createBottomTabNavigator();
@@ -118,11 +119,9 @@ export default function AppNavigator() {
             />
           )}
         </Stack.Screen>
-        <Stack.Screen
-          name="History"
-          component={HistoryScreen}
-          options={{ title: '히스토리', headerBackTitleVisible: false }}
-        />
+        <Stack.Screen name="History" options={{ title: '히스토리', headerBackTitleVisible: false }}>
+          {(props) => <HistoryScreen {...props} darkMode={darkMode} />}
+        </Stack.Screen>
         <Stack.Screen name="RecommendationList" options={{ title: '추천 정리' }}>
           {(props) => <RecommendationListScreen {...props} darkMode={darkMode} />}
         </Stack.Screen>
@@ -136,10 +135,13 @@ export default function AppNavigator() {
           {(props) => <FileListScreen {...props} darkMode={darkMode} />}
         </Stack.Screen>
         <Stack.Screen name="FavoriteList" options={{ title: '즐겨찾기' }}>
-          {(props) => <FavoriteListScreen {...props} />}
+          {(props) => <FavoriteListScreen {...props} darkMode={darkMode} />}
         </Stack.Screen>
         <Stack.Screen name="AnalysisRecommendation" options={{ title: '개선 제안' }}>
-          {(props) => <AnalysisRecommendationScreen {...props} />}
+          {(props) => <AnalysisRecommendationScreen {...props} darkMode={darkMode} />}
+        </Stack.Screen>
+        <Stack.Screen name="SortPreference" options={{ title: '정렬 기준' }}>
+          {(props) => <SortPreferenceScreen {...props} darkMode={darkMode} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

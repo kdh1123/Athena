@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
-import { categoryOptions, fileItems } from '../styles/mockData';
+import { categoryOptions, fileItems, parseFileSizeToMB } from '../styles/mockData';
 import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
 export default function FileScreen({ navigation, darkMode }) {
@@ -32,7 +32,7 @@ export default function FileScreen({ navigation, darkMode }) {
   const filteredFiles = useMemo(() => {
     const sorted = [...fileItems].sort((a, b) => {
       if (sortBy === '용량순') {
-        return parseFloat(b.size) - parseFloat(a.size);
+        return parseFileSizeToMB(b.size) - parseFileSizeToMB(a.size);
       }
 
       if (sortBy === '이름순') {

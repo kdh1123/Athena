@@ -4,9 +4,8 @@ import SectionHeader from '../components/SectionHeader';
 import { analysisRecommendations } from '../styles/mockData';
 import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
-export default function AnalysisRecommendationScreen({ route }) {
+export default function AnalysisRecommendationScreen({ darkMode }) {
   const insets = useSafeAreaInsets();
-  const darkMode = route?.params?.darkMode ?? false;
   const palette = getPalette(darkMode);
 
   return (
@@ -18,7 +17,12 @@ export default function AnalysisRecommendationScreen({ route }) {
       <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>AI가 제안한 정리 항목을 확인하고 채택하세요.</Text>
 
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}> 
-        <SectionHeader title="전체 제안" rightLabel={`${analysisRecommendations.length}개`} />
+        <SectionHeader
+          title="전체 제안"
+          rightLabel={`${analysisRecommendations.length}개`}
+          titleColor={palette.text}
+          rightLabelColor={palette.point}
+        />
         {analysisRecommendations.length === 0 ? (
           <Text style={[styles.emptyText, { color: palette.success }]}>사용자님의 파일은 정말 깨끗해요!</Text>
         ) : (

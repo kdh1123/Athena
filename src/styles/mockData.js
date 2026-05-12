@@ -169,3 +169,22 @@ export const historyItems = [
 export const categoryOptions = ['전체', '문서', '이미지', '오디오', '디자인'];
 export const sortOptions = ['최근순', '용량순', '이름순'];
 export const filterOptions = ['대용량', '미사용', '즐겨찾기', '태그 있음'];
+
+export function parseFileSizeToMB(size) {
+  const match = String(size).trim().match(/^([\d.]+)\s*(KB|MB|GB|TB)$/i);
+
+  if (!match) {
+    return 0;
+  }
+
+  const value = Number(match[1]);
+  const unit = match[2].toUpperCase();
+  const unitScale = {
+    KB: 1 / 1024,
+    MB: 1,
+    GB: 1024,
+    TB: 1024 * 1024,
+  };
+
+  return value * unitScale[unit];
+}

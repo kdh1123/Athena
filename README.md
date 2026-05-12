@@ -8,13 +8,16 @@ Athena는 AI 기반 파일 관리 앱을 목표로 하는 모바일 서비스의
 - React Navigation 기반 화면 이동
 - 더미 데이터 기반 UI 렌더링
 - 공통 재사용 컴포넌트 분리
-- 플로팅 AI 챗봇 버튼 + 모달 UI
+- AI 채팅 탭 UI
+- 파일 검색, 태그 생성, 정렬/우선순위 UI
+- 라이트/다크 모드 토글
 
 ## 제외 범위
 
 - 백엔드 연동
 - AI 로직 구현
-- 실제 파일 접근/처리
+- 실제 파일 정리/삭제/되돌리기 처리
+- 사용자 계정 저장 및 설정 영속화
 
 ## 폴더 구조
 
@@ -30,11 +33,19 @@ src/
   navigation/
     AppNavigator.js
   screens/
+    AIChatScreen.js
     AnalysisScreen.js
+    AnalysisRecommendationScreen.js
+    DeviceCapacityScreen.js
+    FavoriteListScreen.js
+    FileListScreen.js
     FileScreen.js
     HistoryScreen.js
     HomeScreen.js
+    PersonalInfoScreen.js
+    RecommendationListScreen.js
     SettingsScreen.js
+    SortPreferenceScreen.js
   styles/
     mockData.js
     theme.js
@@ -60,7 +71,18 @@ npm run web
 ## 핵심 화면
 
 - Home: 검색, 추천 정리, 저장 용량, 최근 활동
-- File: 시뮬레이션 결과, 카테고리/태그/정렬/필터 UI
+- File: 파일 불러오기, 카테고리/태그/정렬/우선순위 UI
+- AI: 채팅, 첨부, 채팅방 드로어 UI
 - Analysis: 저장 용량 분석, AI 추천 문구(더미), 개선 제안
 - Settings: 사용자 정보, 정렬/알림/모드 토글 UI, 히스토리 이동
 - History: 기록 리스트, 되돌리기 버튼(UI)
+
+## 검증
+
+```bash
+npx expo-doctor
+npx expo export --platform web --output-dir /private/tmp/athena-web-export
+npm audit --audit-level=moderate
+```
+
+현재 `expo-doctor`는 통과합니다. `npm audit`의 남은 항목은 Expo SDK 54의 Metro/PostCSS 전이 의존성 경고이며, `npm audit fix --force`는 Expo 49로 내리는 breaking change를 제안하므로 적용하지 않습니다.

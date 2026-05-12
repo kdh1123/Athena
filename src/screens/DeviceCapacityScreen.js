@@ -28,7 +28,7 @@ export default function DeviceCapacityScreen({ darkMode }) {
       </View>
 
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}> 
-        <SectionHeader title="용량 사용처" />
+        <SectionHeader title="용량 사용처" titleColor={palette.text} />
         {sources.map((item) => {
           const percent = Math.round((item.usedGB / totalGB) * 100);
           return (

@@ -1,9 +1,13 @@
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SectionHeader from '../components/SectionHeader';
 import { historyItems } from '../styles/mockData';
-import { colors, radius, shadows, spacing } from '../styles/theme';
+import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
-export default function HistoryScreen() {
+export default function HistoryScreen({ darkMode }) {
+  const insets = useSafeAreaInsets();
+  const palette = getPalette(darkMode);
+
   const onUndo = () => {
     Alert.alert('되돌리시겠습니까?', '', [
       { text: '아니요', style: 'cancel' },
@@ -17,21 +21,38 @@ export default function HistoryScreen() {
   };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <Text style={styles.pageTitle}>히스토리</Text>
-      <Text style={styles.pageSubtitle}>과거 정리 기록 (더미 데이터)</Text>
+    <ScrollView
+      style={[styles.screen, { backgroundColor: palette.background }]}
+      contentContainerStyle={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 + 5 }]}
+    >
+      <Text style={[styles.pageTitle, { color: palette.text }]}>히스토리</Text>
+      <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>과거 정리 기록 (더미 데이터)</Text>
 
-      <View style={styles.wrapperCard}>
-        <SectionHeader title="리스트" rightLabel={`${historyItems.length}건`} />
+      <View style={[styles.wrapperCard, { backgroundColor: palette.card, borderColor: palette.border }]}>
+        <SectionHeader
+          title="리스트"
+          rightLabel={`${historyItems.length}건`}
+          titleColor={palette.text}
+          rightLabelColor={palette.point}
+        />
         {historyItems.map((item) => (
-          <View key={item.id} style={styles.historyCard}>
-            <Text style={styles.historyDate}>{item.date}</Text>
-            <Text style={styles.historySummary}>{item.summary}</Text>
-            <Text style={styles.historyMeta}>
+          <View
+            key={item.id}
+            style={[
+              styles.historyCard,
+              { backgroundColor: darkMode ? '#151c27' : '#fffef8', borderColor: palette.border },
+            ]}
+          >
+            <Text style={[styles.historyDate, { color: palette.textMuted }]}>{item.date}</Text>
+            <Text style={[styles.historySummary, { color: palette.text }]}>{item.summary}</Text>
+            <Text style={[styles.historyMeta, { color: palette.textMuted }]}>
               변경 {item.changedCount}개 · 확보 공간 {item.freedSpace}
             </Text>
-            <Pressable style={styles.undoButton} onPress={onUndo}>
-              <Text style={styles.undoText}>되돌리기</Text>
+            <Pressable
+              style={[styles.undoButton, { backgroundColor: palette.main, borderColor: darkMode ? palette.border : '#f5dc6b' }]}
+              onPress={onUndo}
+            >
+              <Text style={[styles.undoText, { color: palette.text }]}>되돌리기</Text>
             </Pressable>
           </View>
         ))}

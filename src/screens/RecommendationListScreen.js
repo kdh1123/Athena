@@ -14,7 +14,12 @@ export default function RecommendationListScreen({ darkMode }) {
       <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>AI가 우선순위 기반으로 정리 대상을 추천합니다.</Text>
 
       <View style={[styles.card, { backgroundColor: palette.card, borderColor: palette.border }]}> 
-        <SectionHeader title="전체 추천" rightLabel={`${recommendedActions.length}개`} />
+        <SectionHeader
+          title="전체 추천"
+          rightLabel={`${recommendedActions.length}개`}
+          titleColor={palette.text}
+          rightLabelColor={palette.point}
+        />
         {recommendedActions.map((action) => (
           <View key={action.id} style={[styles.item, { borderColor: palette.border, backgroundColor: darkMode ? '#151c27' : '#fffef8' }]}> 
             <View style={[styles.dot, { backgroundColor: action.color }]} />
