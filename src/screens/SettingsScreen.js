@@ -8,6 +8,7 @@ export default function SettingsScreen({
   navigation,
   darkMode,
   onToggleDarkMode,
+  onSignOut,
 }) {
   const insets = useSafeAreaInsets();
   const palette = getPalette(darkMode);
@@ -66,6 +67,13 @@ export default function SettingsScreen({
           />
         </View>
       </View>
+
+      <Pressable
+        style={[styles.signOutButton, { borderColor: palette.border, backgroundColor: palette.card }]}
+        onPress={onSignOut}
+      >
+        <Text style={[styles.signOutText, { color: palette.point }]}>로그아웃</Text>
+      </Pressable>
     </ScrollView>
   );
 }
@@ -116,5 +124,15 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     fontWeight: '600',
+  },
+  signOutButton: {
+    borderWidth: 1,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    ...shadows.card,
+  },
+  signOutText: {
+    fontWeight: '800',
   },
 });

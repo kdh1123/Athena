@@ -1,25 +1,25 @@
 export const lightColors = {
-  background: '#fffdf5',
+  background: '#f7f8fa',
   card: '#ffffff',
-  main: '#FFF099',
-  point: '#fa8e73',
-  sub: '#c7a58b',
-  text: '#2f2a24',
-  textMuted: '#78695d',
-  border: '#f1e6d2',
-  success: '#6ca581',
+  main: '#e9eef8',
+  point: '#dd6b57',
+  sub: '#6f8fb8',
+  text: '#24272d',
+  textMuted: '#6f7682',
+  border: '#e3e7ee',
+  success: '#4f9569',
 };
 
 export const darkColors = {
-  background: '#14171d',
-  card: '#1d2430',
-  main: '#4f4b2f',
-  point: '#f6c0b2',
-  sub: '#c9ad9a',
-  text: '#f3f6fb',
-  textMuted: '#a9b1bf',
-  border: '#2b3444',
-  success: '#7fc29a',
+  background: '#111419',
+  card: '#1b2028',
+  main: '#263142',
+  point: '#f08a76',
+  sub: '#93abc9',
+  text: '#f4f6f9',
+  textMuted: '#a9b0bc',
+  border: '#2d3541',
+  success: '#78bf8d',
 };
 
 export const colors = lightColors;
@@ -36,6 +36,12 @@ export const spacing = {
   xl: 30,
 };
 
+export const fonts = {
+  regular: 'System',
+  medium: 'System',
+  bold: 'System',
+};
+
 export const radius = {
   sm: 8,
   md: 14,
@@ -45,10 +51,10 @@ export const radius = {
 
 export const shadows = {
   card: {
-    shadowColor: '#5c4d41',
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 8 },
-    shadowRadius: 14,
-    elevation: 3,
+    shadowColor: '#1f2937',
+    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 6 },
+    shadowRadius: 12,
+    elevation: 2,
   },
 };

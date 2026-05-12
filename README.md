@@ -9,13 +9,17 @@ Athena는 AI 기반 파일 관리 앱을 목표로 하는 모바일 서비스의
 - 더미 데이터 기반 UI 렌더링
 - 공통 재사용 컴포넌트 분리
 - AI 채팅 탭 UI
+- 로컬 더미 데이터 기반 AI 채팅 응답/자동 분석 흐름
 - 파일 검색, 태그 생성, 정렬/우선순위 UI
 - 라이트/다크 모드 토글
+- Firebase 로그인/회원가입 도입 가이드 문서
+- 로그인/회원가입 화면 UI
 
 ## 제외 범위
 
 - 백엔드 연동
 - AI 로직 구현
+- 실제 AI API 연동
 - 실제 파일 정리/삭제/되돌리기 처리
 - 사용자 계정 저장 및 설정 영속화
 
@@ -27,6 +31,7 @@ src/
     ChatModal.js
     FileCard.js
     FloatingChatButton.js
+    LogoMark.js
     SectionHeader.js
     StorageBar.js
     TagItem.js
@@ -42,13 +47,17 @@ src/
     FileScreen.js
     HistoryScreen.js
     HomeScreen.js
+    LoginScreen.js
     PersonalInfoScreen.js
     RecommendationListScreen.js
     SettingsScreen.js
+    SignUpScreen.js
     SortPreferenceScreen.js
   styles/
     mockData.js
     theme.js
+  services/
+    aiService.js
 ```
 
 ## 실행 방법
@@ -73,9 +82,14 @@ npm run web
 - Home: 검색, 추천 정리, 저장 용량, 최근 활동
 - File: 파일 불러오기, 카테고리/태그/정렬/우선순위 UI
 - AI: 채팅, 첨부, 채팅방 드로어 UI
-- Analysis: 저장 용량 분석, AI 추천 문구(더미), 개선 제안
+- Analysis: 저장 용량 분석, AI 자동 분석(더미), 개선 제안
 - Settings: 사용자 정보, 정렬/알림/모드 토글 UI, 히스토리 이동
 - History: 기록 리스트, 되돌리기 버튼(UI)
+
+## 후속 작업 문서
+
+- `AI_PROJECT_PROMPT.md`: 다른 AI/개발자가 이어서 작업할 때 사용할 현재 상태, 규칙, 우선순위
+- `FIREBASE_SETUP.md`: Firebase Authentication/Firestore 도입 순서와 예시 코드
 
 ## 검증
 

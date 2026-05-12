@@ -16,7 +16,8 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { getPalette, spacing } from '../styles/theme';
+import { createChatReply } from '../services/aiService';
+import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
 const DRAWER_WIDTH = 280;
 
@@ -35,12 +36,13 @@ function createId(prefix) {
 export default function AIChatScreen({ darkMode }) {
   const insets = useSafeAreaInsets();
   const palette = getPalette(darkMode);
-  const surface = darkMode ? '#1a212d' : '#f5eedf';
-  const surfaceElevated = darkMode ? '#222c3c' : '#fffdf8';
-  const divider = darkMode ? '#313d4e' : '#e8dcc3';
-  const assistantStripe = darkMode ? '#93a9cf' : '#b28c64';
+  const surface = darkMode ? '#151b24' : '#f1f4f8';
+  const surfaceElevated = darkMode ? '#222a35' : '#ffffff';
+  const divider = darkMode ? '#313a47' : '#e3e7ee';
+  const assistantStripe = darkMode ? '#93abc9' : '#6f8fb8';
   const [messages, setMessages] = useState(seedMessages);
   const [input, setInput] = useState('');
+  const [isThinking, setIsThinking] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [chatSearch, setChatSearch] = useState('');
   const [chatRooms, setChatRooms] = useState([
@@ -117,22 +119,21 @@ export default function AIChatScreen({ darkMode }) {
 
   const canSend = useMemo(() => input.trim().length > 0, [input]);
 
-  const onSend = () => {
+  const quickPrompts = ['대용량 파일부터 정리해줘', '업무 파일 태그를 추천해줘', '사진 정리 기준을 만들어줘'];
+
+  const onSend = async () => {
     if (!canSend) {
       return;
     }
 
     const userText = input.trim();
-    setMessages((prev) => [
-      ...prev,
-      { id: createId('u'), role: 'user', text: userText },
-      {
-        id: createId('a'),
-        role: 'assistant',
-        text: '요청을 확인했어요. 파일 우선순위와 정리 제안을 바로 계산해볼게요. (데모 응답)',
-      },
-    ]);
+    setMessages((prev) => [...prev, { id: createId('u'), role: 'user', text: userText }]);
     setInput('');
+    setIsThinking(true);
+
+    const reply = await createChatReply(userText);
+    setMessages((prev) => [...prev, { id: createId('a'), role: 'assistant', text: reply }]);
+    setIsThinking(false);
   };
 
   const pickImage = async () => {
@@ -184,7 +185,7 @@ export default function AIChatScreen({ darkMode }) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top + 52 : 0}
     >
-      <View style={[styles.content, { paddingTop: spacing.sm + insets.top * 0.15 }]} {...panResponder.panHandlers}>
+      <View style={[styles.content, { paddingTop: spacing.lg + insets.top * 0.45 + 5 }]} {...panResponder.panHandlers}>
         <View style={styles.topRow}>
           <Pressable style={[styles.menuButton, { backgroundColor: surfaceElevated }]} onPress={openDrawer}>
             <Ionicons name="menu" size={18} color={palette.text} />
@@ -195,14 +196,29 @@ export default function AIChatScreen({ darkMode }) {
           </View>
           </View>
 
-          <Pressable
-            style={[styles.focusCard, { backgroundColor: palette.point }]}
-            onPress={() => setInput('지금 바로 파일 정리 우선순위를 추천해줘')}
-          >
-            <Text style={styles.focusEyebrow}>핵심 기능</Text>
-            <Text style={styles.focusTitle}>정리 우선순위 빠른 추천</Text>
-            <Text style={styles.focusDescription}>분석 없이 바로 시작하려면 탭하세요.</Text>
-          </Pressable>
+        <View style={[styles.summaryCard, { backgroundColor: palette.card, borderColor: palette.border }]}>
+          <View style={[styles.summaryIcon, { backgroundColor: palette.main }]}>
+            <Ionicons name="sparkles-outline" size={18} color={palette.point} />
+          </View>
+          <View style={styles.summaryText}>
+            <Text style={[styles.summaryTitle, { color: palette.text }]}>AI 파일 정리 도우미</Text>
+            <Text style={[styles.summaryDescription, { color: palette.textMuted }]}>
+              파일 목록을 바탕으로 우선순위, 태그, 보관 후보를 제안합니다.
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.promptRow}>
+          {quickPrompts.map((prompt) => (
+            <Pressable
+              key={prompt}
+              style={[styles.promptChip, { backgroundColor: palette.card, borderColor: palette.border }]}
+              onPress={() => setInput(prompt)}
+            >
+              <Text style={[styles.promptText, { color: palette.text }]} numberOfLines={1}>{prompt}</Text>
+            </Pressable>
+          ))}
+        </View>
 
         <FlatList
           data={messages}
@@ -223,9 +239,19 @@ export default function AIChatScreen({ darkMode }) {
               </View>
             </View>
           )}
+          ListFooterComponent={
+            isThinking ? (
+              <View style={[styles.messageRow, styles.aiRow]}>
+                <View style={[styles.aiStripe, { backgroundColor: assistantStripe }]} />
+                <View style={styles.aiMessageBody}>
+                  <Text style={[styles.bubbleText, { color: palette.textMuted }]}>파일 상태를 확인하고 있어요...</Text>
+                </View>
+              </View>
+            ) : null
+          }
         />
 
-        <View style={[styles.inputRow, { backgroundColor: surface, paddingBottom: Math.max(insets.bottom, spacing.xs) }]}> 
+        <View style={[styles.inputRow, { backgroundColor: palette.card, borderColor: palette.border }]}> 
           <Pressable style={[styles.attachButton, { backgroundColor: surfaceElevated }]} onPress={onPressAttach}>
             <Ionicons name="attach" size={18} color={palette.text} />
           </Pressable>
@@ -267,7 +293,7 @@ export default function AIChatScreen({ darkMode }) {
             }}
           >
             <Ionicons name="add" size={18} color={palette.text} />
-            <Text style={styles.newChatText}>새 채팅</Text>
+            <Text style={[styles.newChatText, { color: palette.text }]}>새 채팅</Text>
           </Pressable>
 
           <TextInput
@@ -305,50 +331,74 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   menuButton: {
-    width: 36,
-    height: 32,
-    borderRadius: 8,
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing.md,
   },
   pageTitle: {
-    fontSize: 24,
-    fontWeight: '800',
+    fontSize: 25,
+    fontWeight: '700',
   },
   pageSubtitle: {
     fontSize: 13,
     marginTop: 4,
   },
-  focusCard: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderRadius: 10,
-    marginBottom: spacing.md,
+  summaryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    ...shadows.card,
   },
-  focusEyebrow: {
-    color: '#fff5f2',
+  summaryIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.sm,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: spacing.sm,
+  },
+  summaryText: {
+    flex: 1,
+  },
+  summaryTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  summaryDescription: {
+    marginTop: 3,
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  promptRow: {
+    flexDirection: 'row',
+    columnGap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  promptChip: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xs,
+  },
+  promptText: {
     fontSize: 11,
-    letterSpacing: 0.4,
-    marginBottom: 4,
     fontWeight: '600',
-  },
-  focusTitle: {
-    color: '#ffffff',
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  focusDescription: {
-    color: '#fff8f6',
-    fontSize: 13,
-    marginTop: 6,
   },
   messageList: {
     flexGrow: 1,
-    borderRadius: 10,
+    borderRadius: radius.lg,
     paddingTop: spacing.md,
-    paddingHorizontal: spacing.sm,
-    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.xs,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   messageRow: {
     marginBottom: spacing.md,
@@ -375,7 +425,7 @@ const styles = StyleSheet.create({
     paddingLeft: 0,
   },
   userMessageBody: {
-    borderRadius: 9,
+    borderRadius: radius.md,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.sm,
   },
@@ -385,31 +435,35 @@ const styles = StyleSheet.create({
   },
   inputRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    paddingTop: spacing.xs,
+    alignItems: 'center',
+    borderWidth: 1,
+    minHeight: 50,
+    paddingVertical: 6,
     paddingHorizontal: spacing.xs,
-    borderRadius: 10,
+    borderRadius: radius.lg,
+    ...shadows.card,
   },
   attachButton: {
-    width: 36,
-    height: 38,
-    borderRadius: 8,
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: spacing.xs,
   },
   input: {
     flex: 1,
-    minHeight: 38,
-    maxHeight: 84,
-    borderRadius: 8,
+    minHeight: 30,
+    maxHeight: 44,
+    borderRadius: radius.sm,
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs + 1,
+    paddingVertical: Platform.OS === 'ios' ? 4 : 1,
+    fontSize: 14,
   },
   sendButton: {
-    width: 36,
-    height: 38,
-    borderRadius: 8,
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: spacing.xs,
@@ -435,7 +489,7 @@ const styles = StyleSheet.create({
     zIndex: 30,
   },
   newChatButton: {
-    borderRadius: 8,
+    borderRadius: radius.sm,
     paddingVertical: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
@@ -444,12 +498,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   newChatText: {
-    color: '#1f1a16',
     fontWeight: '700',
     fontSize: 14,
   },
   searchInput: {
-    borderRadius: 8,
+    borderRadius: radius.sm,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     fontSize: 14,

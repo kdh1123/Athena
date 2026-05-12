@@ -1,9 +1,10 @@
-import { Animated, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useCallback, useMemo, useRef } from 'react';
+import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Circle } from 'react-native-svg';
 import SectionHeader from '../components/SectionHeader';
+import { createAutomaticAnalysis } from '../services/aiService';
 import { analysisRecommendations } from '../styles/mockData';
 import { colors, getPalette, radius, shadows, spacing } from '../styles/theme';
 
@@ -93,6 +94,16 @@ export default function AnalysisScreen({ navigation, darkMode }) {
   );
   const revealProgress = useRef(new Animated.Value(0)).current;
   const previewRecommendations = analysisRecommendations.slice(0, 4);
+  const [aiAnalysis, setAiAnalysis] = useState(() => createAutomaticAnalysis());
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const runAutomaticAnalysis = useCallback(() => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setAiAnalysis(createAutomaticAnalysis());
+      setIsRefreshing(false);
+    }, 360);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -115,11 +126,19 @@ export default function AnalysisScreen({ navigation, darkMode }) {
       <Text style={[styles.pageTitle, { color: palette.text }]}>파일 분석</Text>
       <Text style={[styles.pageSubtitle, { color: palette.textMuted }]}>기기 상태 기반 인사이트</Text>
 
-      <View style={[styles.heroCard, { backgroundColor: darkMode ? '#1a212d' : '#fff4dd', borderColor: darkMode ? palette.border : '#f7dfbf' }]}> 
-        <Text style={[styles.heroTitle, { color: palette.point }]}>AI 추천</Text>
+      <View style={[styles.heroCard, { backgroundColor: darkMode ? '#1a212d' : '#f1f4f8', borderColor: palette.border }]}> 
+        <View style={styles.heroHead}>
+          <Text style={[styles.heroTitle, { color: palette.point }]}>AI 자동 분석</Text>
+          <View style={[styles.statusBadge, { backgroundColor: palette.main }]}>
+            <Text style={[styles.statusText, { color: palette.text }]}>{aiAnalysis.status}</Text>
+          </View>
+        </View>
         <Text style={[styles.heroBody, { color: palette.text }]}>
-          현재 이미지와 대용량 디자인 파일이 저장 공간의 대부분을 차지하고 있어요. 정기 정리 루틴을 적용하면 파일 탐색 속도와 여유 공간이 개선됩니다.
+          {aiAnalysis.summary}
         </Text>
+        <Pressable style={[styles.analysisButton, { backgroundColor: palette.point }]} onPress={runAutomaticAnalysis}>
+          <Text style={styles.analysisButtonText}>{isRefreshing ? '분석 중' : '다시 분석'}</Text>
+        </Pressable>
       </View>
 
       <View style={[styles.sectionCard, { backgroundColor: palette.card, borderColor: palette.border }]}> 
@@ -135,6 +154,12 @@ export default function AnalysisScreen({ navigation, darkMode }) {
           titleColor={palette.text}
           rightLabelColor={palette.point}
         />
+        {aiAnalysis.recommendations.map((item) => (
+          <View key={item} style={[styles.aiTipRow, { borderBottomColor: palette.border }]}>
+            <Text style={[styles.aiTipText, { color: palette.text }]}>{item}</Text>
+          </View>
+        ))}
+
         {previewRecommendations.length === 0 ? (
           <Text style={[styles.emptyText, { color: palette.success }]}>사용자님의 파일은 정말 깨끗해요!</Text>
         ) : (
@@ -177,11 +202,38 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 14,
-    fontWeight: '800',
+    fontWeight: '700',
     marginBottom: spacing.xs,
+  },
+  heroHead: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  statusBadge: {
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 4,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   heroBody: {
     lineHeight: 21,
+  },
+  analysisButton: {
+    alignSelf: 'flex-start',
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    marginTop: spacing.sm,
+  },
+  analysisButtonText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '700',
   },
   sectionCard: {
     borderWidth: 1,
@@ -222,6 +274,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: spacing.sm,
     marginBottom: spacing.sm,
+  },
+  aiTipRow: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    paddingVertical: spacing.xs,
+  },
+  aiTipText: {
+    fontSize: 13,
+    lineHeight: 19,
   },
   tipTitle: {
     fontWeight: '700',

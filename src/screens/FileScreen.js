@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.md,
-    paddingBottom: 110,
+    paddingBottom: spacing.lg,
   },
   pageTitle: {
     fontSize: 26,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
     borderColor: '#d8cab5',
     borderRadius: radius.md,
-    backgroundColor: '#fffef8',
+    backgroundColor: '#ffffff',
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     marginBottom: spacing.md,
