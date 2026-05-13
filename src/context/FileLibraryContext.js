@@ -54,11 +54,20 @@ export function parseFileSizeToMB(size) {
 function getCategory(asset) {
   const mime = asset.mimeType || asset.type || '';
   const name = asset.name || asset.fileName || '파일';
+
+  if (asset.mediaType === 'photo') {
+    return '이미지';
+  }
+
+  if (asset.mediaType === 'video') {
+    return '동영상';
+  }
+
   return categoryMatchers.find((matcher) => matcher.test(mime, name))?.category || '기타';
 }
 
 function getModifiedDate(asset) {
-  const timestamp = asset.lastModified || asset.modificationTime || Date.now();
+  const timestamp = asset.lastModified || asset.modificationTime || asset.creationTime || Date.now();
   return new Date(timestamp).toISOString().slice(0, 10);
 }
 
@@ -76,14 +85,16 @@ function getTags(asset, category) {
 function normalizeAsset(asset) {
   const category = getCategory(asset);
   const sizeBytes = asset.size || asset.fileSize || 0;
-  const name = asset.name || asset.fileName || '이름 없는 파일';
+  const name = asset.name || asset.fileName || asset.filename || '이름 없는 파일';
   const uri = asset.uri || `${name}-${Date.now()}`;
 
   return {
-    id: `${uri}-${sizeBytes}-${name}`,
+    id: asset.id || `${uri}-${sizeBytes}-${name}`,
     name,
     uri,
     mimeType: asset.mimeType || asset.type || '',
+    source: asset.source || 'document-picker',
+    assetId: asset.assetId || asset.id || null,
     category,
     size: bytesToDisplaySize(sizeBytes),
     sizeBytes,

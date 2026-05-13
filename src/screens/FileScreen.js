@@ -1,4 +1,5 @@
 import * as DocumentPicker from 'expo-document-picker';
+import * as MediaLibrary from 'expo-media-library';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -86,6 +87,36 @@ export default function FileScreen({ navigation, darkMode }) {
     }
   };
 
+  const onSyncMediaLibrary = async () => {
+    const permission = await MediaLibrary.requestPermissionsAsync();
+
+    if (!permission.granted) {
+      Alert.alert('권한 필요', '사진과 동영상을 연동하려면 미디어 라이브러리 접근 권한이 필요합니다.');
+      return;
+    }
+
+    const result = await MediaLibrary.getAssetsAsync({
+      first: 100,
+      mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
+    });
+
+    if (!result.assets.length) {
+      Alert.alert('연동할 항목 없음', '사진/동영상 라이브러리에서 가져올 항목이 없습니다.');
+      return;
+    }
+
+    const imported = addFilesFromAssets(
+      result.assets.map((asset) => ({
+        ...asset,
+        source: 'media-library',
+        assetId: asset.id,
+        name: asset.filename,
+      }))
+    );
+
+    Alert.alert('미디어 연동 완료', `최근 사진/동영상 ${imported.length}개를 파일 분석에 반영했습니다.`);
+  };
+
   return (
     <ScrollView
       style={[styles.screen, { backgroundColor: palette.background }]}
@@ -97,6 +128,11 @@ export default function FileScreen({ navigation, darkMode }) {
       <Pressable style={[styles.uploadBox, { borderColor: palette.border, backgroundColor: darkMode ? '#151c27' : '#fffef8' }]} onPress={onImportFile}>
         <Text style={[styles.uploadTitle, { color: palette.text }]}>파일 불러오기</Text>
         <Text style={[styles.uploadSub, { color: palette.textMuted }]}>탭해서 파일 선택 창을 열 수 있습니다.</Text>
+      </Pressable>
+
+      <Pressable style={[styles.mediaBox, { borderColor: palette.border, backgroundColor: palette.card }]} onPress={onSyncMediaLibrary}>
+        <Text style={[styles.uploadTitle, { color: palette.text }]}>사진/동영상 라이브러리 연동</Text>
+        <Text style={[styles.uploadSub, { color: palette.textMuted }]}>권한 허용 후 최근 미디어 100개를 분석에 반영합니다.</Text>
       </Pressable>
 
       <SectionHeader
@@ -236,6 +272,13 @@ const styles = StyleSheet.create({
     borderColor: '#d8cab5',
     borderRadius: radius.md,
     backgroundColor: '#ffffff',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
+  },
+  mediaBox: {
+    borderWidth: 1,
+    borderRadius: radius.md,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     marginBottom: spacing.md,
