@@ -1,6 +1,8 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 const FileLibraryContext = createContext(null);
+const STORAGE_KEY = 'athena:file-library:v1';
 
 const categoryMatchers = [
   { category: '이미지', test: (mime, name) => mime.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic)$/i.test(name) },
@@ -179,6 +181,41 @@ function buildUsage(files) {
 
 export function FileLibraryProvider({ children }) {
   const [files, setFiles] = useState([]);
+  const hasLoadedFiles = useRef(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFiles() {
+      try {
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+
+        if (stored && isMounted) {
+          setFiles(JSON.parse(stored));
+        }
+      } catch (error) {
+        console.warn('Failed to load linked files', error);
+      } finally {
+        hasLoadedFiles.current = true;
+      }
+    }
+
+    loadFiles();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedFiles.current) {
+      return;
+    }
+
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(files)).catch((error) => {
+      console.warn('Failed to save linked files', error);
+    });
+  }, [files]);
 
   const addFilesFromAssets = useCallback((assets) => {
     const normalized = assets.map(normalizeAsset);

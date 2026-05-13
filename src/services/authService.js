@@ -1,6 +1,7 @@
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -13,6 +14,10 @@ export function observeAuthState(onChange) {
 
 export function signInWithEmail(email, password) {
   return signInWithEmailAndPassword(auth, email, password);
+}
+
+export function sendPasswordReset(email) {
+  return sendPasswordResetEmail(auth, email);
 }
 
 export async function signUpWithEmail({ name, email, password }) {

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LogoMark from '../components/LogoMark';
-import { getAuthErrorMessage, signInWithEmail } from '../services/authService';
+import { getAuthErrorMessage, sendPasswordReset, signInWithEmail } from '../services/authService';
 import { getPalette, radius, shadows, spacing } from '../styles/theme';
 
 export default function LoginScreen({ navigation, darkMode }) {
@@ -11,6 +11,8 @@ export default function LoginScreen({ navigation, darkMode }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+  const emailPattern = /^\S+@\S+$/;
 
   const submit = async () => {
     if (!email.trim() || password.length < 6) {
@@ -26,6 +28,31 @@ export default function LoginScreen({ navigation, darkMode }) {
       Alert.alert('로그인 실패', getAuthErrorMessage(error));
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const resetPassword = async () => {
+    const cleanEmail = email.trim();
+
+    if (!cleanEmail) {
+      Alert.alert('이메일 필요', '비밀번호를 재설정할 이메일을 먼저 입력해주세요.');
+      return;
+    }
+
+    if (!emailPattern.test(cleanEmail)) {
+      Alert.alert('입력 확인', '이메일 형식이 올바르지 않습니다.');
+      return;
+    }
+
+    setIsResetting(true);
+
+    try {
+      await sendPasswordReset(cleanEmail);
+      Alert.alert('메일 전송 완료', '입력한 이메일로 비밀번호 재설정 링크를 보냈습니다.');
+    } catch (error) {
+      Alert.alert('메일 전송 실패', getAuthErrorMessage(error));
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -67,6 +94,11 @@ export default function LoginScreen({ navigation, darkMode }) {
         </Pressable>
         <Pressable style={styles.secondaryButton} onPress={() => navigation.navigate('SignUp')}>
           <Text style={[styles.secondaryButtonText, { color: palette.point }]}>회원가입</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryButton} onPress={resetPassword} disabled={isResetting}>
+          <Text style={[styles.secondaryButtonText, { color: palette.textMuted }]}>
+            {isResetting ? '재설정 메일 전송 중' : '비밀번호를 잊으셨나요?'}
+          </Text>
         </Pressable>
       </View>
     </KeyboardAvoidingView>

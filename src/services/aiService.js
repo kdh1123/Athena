@@ -1,5 +1,7 @@
 import { parseFileSizeToMB } from '../context/FileLibraryContext';
 
+const AI_PROXY_URL = process.env.EXPO_PUBLIC_AI_PROXY_URL;
+
 function summarizeFiles(files) {
   const largeFiles = files
     .filter((item) => parseFileSizeToMB(item.size) >= 100)
@@ -15,11 +17,19 @@ function summarizeFiles(files) {
   };
 }
 
-export async function createChatReply(message, files = []) {
+function createFilePayload(files) {
+  return files.slice(0, 30).map((item) => ({
+    name: item.name,
+    category: item.category,
+    size: item.size,
+    modifiedAt: item.modifiedAt,
+    tags: item.tags,
+  }));
+}
+
+function createLocalChatReply(message, files = []) {
   const text = message.trim();
   const summary = summarizeFiles(files);
-
-  await new Promise((resolve) => setTimeout(resolve, 320));
 
   if (/(대용량|용량|공간|정리)/.test(text)) {
     const largest = summary.largestFile;
@@ -39,6 +49,47 @@ export async function createChatReply(message, files = []) {
   }
 
   return '파일 목록을 기준으로 정리 우선순위, 태그 추천, 보관함 이동 후보를 함께 제안할 수 있습니다. “대용량 파일부터 정리해줘”처럼 요청해보세요.';
+}
+
+async function requestAiProxy(message, files) {
+  if (!AI_PROXY_URL) {
+    return null;
+  }
+
+  const response = await fetch(AI_PROXY_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message,
+      files: createFilePayload(files),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`AI proxy request failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.reply || data.text || data.message || null;
+}
+
+export async function createChatReply(message, files = []) {
+  const text = message.trim();
+
+  try {
+    const proxyReply = await requestAiProxy(text, files);
+
+    if (proxyReply) {
+      return proxyReply;
+    }
+  } catch (error) {
+    console.warn('AI proxy failed, falling back to local reply', error);
+  }
+
+  await new Promise((resolve) => setTimeout(resolve, 320));
+  return createLocalChatReply(text, files);
 }
 
 export function createAutomaticAnalysis(files = []) {

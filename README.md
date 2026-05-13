@@ -1,27 +1,25 @@
-# Athena (Expo UI Prototype)
+# Athena
 
-Athena는 AI 기반 파일 관리 앱을 목표로 하는 모바일 서비스의 **프론트엔드 UI/화면 구조 프로토타입**입니다.
+Athena는 AI 기반 파일 관리 앱을 목표로 하는 Expo React Native 앱입니다.
 
 ## 구현 범위
 
 - React Native (Expo) 기반 화면 구조
 - React Navigation 기반 화면 이동
-- 더미 데이터 기반 UI 렌더링
 - 공통 재사용 컴포넌트 분리
-- AI 채팅 탭 UI
-- 로컬 더미 데이터 기반 AI 채팅 응답/자동 분석 흐름
+- Firebase 이메일/비밀번호 로그인, 회원가입, 비밀번호 재설정
+- 실제 파일 선택 기반 파일 목록/추천/분석 반영
+- AI 프록시 연동 기반 채팅 응답, 프록시 미설정 시 로컬 분석 응답 폴백
 - 파일 검색, 태그 생성, 정렬/우선순위 UI
 - 라이트/다크 모드 토글
-- Firebase 로그인/회원가입 도입 가이드 문서
-- 로그인/회원가입 화면 UI
 
 ## 제외 범위
 
-- 백엔드 연동
-- AI 로직 구현
-- 실제 AI API 연동
-- 실제 파일 정리/삭제/되돌리기 처리
-- 사용자 계정 저장 및 설정 영속화
+- 모바일 OS 전체 파일 시스템 자동 스캔
+- 원본 파일의 직접 삭제/이동
+- 클라이언트 앱 내부의 AI API 키 보관
+
+Expo 앱은 보안상 사용자가 선택하지 않은 휴대폰 전체 파일을 마음대로 읽거나 삭제할 수 없습니다. 현재 구현은 `expo-document-picker`와 `expo-image-picker`로 사용자가 직접 선택한 실제 파일의 이름, 크기, 유형, URI 같은 메타데이터를 연동하고 AsyncStorage에 보존합니다. 원본 파일 삭제/이동까지 필요하면 네이티브 모듈 또는 서버/클라우드 스토리지 기반 워크플로가 필요합니다.
 
 ## 폴더 구조
 
@@ -37,6 +35,8 @@ src/
     TagItem.js
   navigation/
     AppNavigator.js
+  context/
+    FileLibraryContext.js
   screens/
     AIChatScreen.js
     AnalysisScreen.js
@@ -53,12 +53,40 @@ src/
     SettingsScreen.js
     SignUpScreen.js
     SortPreferenceScreen.js
-  styles/
-    mockData.js
-    theme.js
   services/
     aiService.js
+    authService.js
+    firebase.js
+  styles/
+    theme.js
 ```
+
+## 환경 변수
+
+`.env`에 Firebase 설정을 넣습니다. AI 채팅을 실제 모델과 연결하려면 클라이언트에 API 키를 넣지 말고, 별도 서버나 Firebase Cloud Functions URL을 아래 값으로 넣습니다.
+
+```bash
+EXPO_PUBLIC_AI_PROXY_URL=https://your-ai-proxy.example.com/chatWithFiles
+```
+
+AI 프록시는 `POST` 요청으로 아래 형식을 받으면 됩니다.
+
+```json
+{
+  "message": "대용량 파일부터 정리해줘",
+  "files": [
+    {
+      "name": "video.mov",
+      "category": "동영상",
+      "size": "480MB",
+      "modifiedAt": "2026-05-13",
+      "tags": ["동영상", "대용량"]
+    }
+  ]
+}
+```
+
+응답은 `reply`, `text`, `message` 중 하나의 문자열 필드를 반환하면 앱에서 표시합니다.
 
 ## 실행 방법
 
@@ -82,7 +110,7 @@ npm run web
 - Home: 검색, 추천 정리, 저장 용량, 최근 활동
 - File: 파일 불러오기, 카테고리/태그/정렬/우선순위 UI
 - AI: 채팅, 첨부, 채팅방 드로어 UI
-- Analysis: 저장 용량 분석, AI 자동 분석(더미), 개선 제안
+- Analysis: 연동 파일 기반 저장 용량 분석, AI 자동 분석, 개선 제안
 - Settings: 사용자 정보, 정렬/알림/모드 토글 UI, 히스토리 이동
 - History: 기록 리스트, 되돌리기 버튼(UI)
 
