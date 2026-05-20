@@ -1,5 +1,4 @@
 import * as DocumentPicker from 'expo-document-picker';
-import * as MediaLibrary from 'expo-media-library';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useMemo, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -88,33 +87,41 @@ export default function FileScreen({ navigation, darkMode }) {
   };
 
   const onSyncMediaLibrary = async () => {
-    const permission = await MediaLibrary.requestPermissionsAsync();
+    try {
+      const MediaLibrary = await import('expo-media-library');
+      const permission = await MediaLibrary.requestPermissionsAsync();
 
-    if (!permission.granted) {
-      Alert.alert('권한 필요', '사진과 동영상을 연동하려면 미디어 라이브러리 접근 권한이 필요합니다.');
-      return;
+      if (!permission.granted) {
+        Alert.alert('권한 필요', '사진과 동영상을 연동하려면 미디어 라이브러리 접근 권한이 필요합니다.');
+        return;
+      }
+
+      const result = await MediaLibrary.getAssetsAsync({
+        first: 100,
+        mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
+      });
+
+      if (!result.assets.length) {
+        Alert.alert('연동할 항목 없음', '사진/동영상 라이브러리에서 가져올 항목이 없습니다.');
+        return;
+      }
+
+      const imported = addFilesFromAssets(
+        result.assets.map((asset) => ({
+          ...asset,
+          source: 'media-library',
+          assetId: asset.id,
+          name: asset.filename,
+        }))
+      );
+
+      Alert.alert('미디어 연동 완료', `최근 사진/동영상 ${imported.length}개를 파일 분석에 반영했습니다.`);
+    } catch (error) {
+      Alert.alert(
+        'Expo Go 제한',
+        '현재 환경에서는 사진/동영상 라이브러리 전체 연동이 제한됩니다. Expo Go에서는 파일 불러오기를 사용하고, 전체 미디어 연동은 개발 빌드에서 확인해주세요.'
+      );
     }
-
-    const result = await MediaLibrary.getAssetsAsync({
-      first: 100,
-      mediaType: [MediaLibrary.MediaType.photo, MediaLibrary.MediaType.video],
-    });
-
-    if (!result.assets.length) {
-      Alert.alert('연동할 항목 없음', '사진/동영상 라이브러리에서 가져올 항목이 없습니다.');
-      return;
-    }
-
-    const imported = addFilesFromAssets(
-      result.assets.map((asset) => ({
-        ...asset,
-        source: 'media-library',
-        assetId: asset.id,
-        name: asset.filename,
-      }))
-    );
-
-    Alert.alert('미디어 연동 완료', `최근 사진/동영상 ${imported.length}개를 파일 분석에 반영했습니다.`);
   };
 
   return (
@@ -132,7 +139,7 @@ export default function FileScreen({ navigation, darkMode }) {
 
       <Pressable style={[styles.mediaBox, { borderColor: palette.border, backgroundColor: palette.card }]} onPress={onSyncMediaLibrary}>
         <Text style={[styles.uploadTitle, { color: palette.text }]}>사진/동영상 라이브러리 연동</Text>
-        <Text style={[styles.uploadSub, { color: palette.textMuted }]}>권한 허용 후 최근 미디어 100개를 분석에 반영합니다.</Text>
+        <Text style={[styles.uploadSub, { color: palette.textMuted }]}>Expo Go에서는 제한될 수 있으며, 가능하면 최근 미디어 100개를 분석에 반영합니다.</Text>
       </Pressable>
 
       <SectionHeader

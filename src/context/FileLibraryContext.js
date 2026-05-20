@@ -1,5 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { appStorage } from '../services/storageService';
 
 const FileLibraryContext = createContext(null);
 const STORAGE_KEY = 'athena:file-library:v1';
@@ -199,13 +199,12 @@ export function FileLibraryProvider({ children }) {
 
     async function loadFiles() {
       try {
-        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        const stored = await appStorage.getItem(STORAGE_KEY);
 
         if (stored && isMounted) {
           setFiles(JSON.parse(stored));
         }
       } catch (error) {
-        console.warn('Failed to load linked files', error);
       } finally {
         hasLoadedFiles.current = true;
       }
@@ -223,9 +222,7 @@ export function FileLibraryProvider({ children }) {
       return;
     }
 
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(files)).catch((error) => {
-      console.warn('Failed to save linked files', error);
-    });
+    appStorage.setItem(STORAGE_KEY, JSON.stringify(files));
   }, [files]);
 
   const addFilesFromAssets = useCallback((assets) => {
